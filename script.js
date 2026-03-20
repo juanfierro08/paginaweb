@@ -144,46 +144,74 @@ const dashboard = {
     },
     
     renderPlans: function(user) {
-        // Base Plans
-        const basePlans = [
-            { name: "Plan Básico", speed: "50 Mbps", basePrice: 40000, desc: "Para navegación y tareas", icon: "wifi" },
-            { name: "Plan Estándar", speed: "200 Mbps", basePrice: 70000, desc: "Streaming y teletrabajo ideal", icon: "zap" },
-            { name: "Plan Premium", speed: "600 Mbps", basePrice: 120000, desc: "Gamer, 4K y múltiples dispositivos", icon: "rocket" }
-        ];
-        
-        // Modifier function based on stratum (1 to 6)
-        let multiplier = 1;
-        if(user.estrato === 1) multiplier = 0.5;
-        if(user.estrato === 2) multiplier = 0.7;
-        if(user.estrato === 3) multiplier = 0.9;
-        if(user.estrato === 4) multiplier = 1.1;
-        if(user.estrato === 5) multiplier = 1.4;
-        if(user.estrato === 6) multiplier = 1.8;
-        
         let html = '';
-        basePlans.forEach(p => {
-            const finalPrice = Math.floor(p.basePrice * multiplier);
-            // Format number
-            const formatted = finalPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-            const isPremium = p.name.includes("Premium");
+        let isRural = user.zona === 'rural';
+        let plans = [];
+        
+        // Multiplicador del precio según estrato (estrato bajo = min de rango, medio = intermedio, alto = max de rango)
+        let boost = 0;
+        if(user.estrato >= 3 && user.estrato <= 4) boost = 0.5;
+        if(user.estrato >= 5) boost = 1.0;
+
+        function renderSpecificCard(p, user) {
+            const formatted = Math.floor(p.price).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            const priceHtml = p.price === 0 ? "¡GRATIS!" : `<span>$</span>${formatted}`;
             
-            html += `
-                <div class="service-card ${isPremium ? 'premium' : ''}" style="${isPremium ? '' : 'border-top: 4px solid var(--primary)'}">
-                    ${isPremium ? '<div class="popular-badge">Recomendado</div>' : ''}
-                    <div class="card-icon"><i data-lucide="${p.icon}"></i></div>
+            let cardClasses = 'service-card ';
+            if(p.premium) cardClasses += 'premium ';
+            if(p.isSocial) cardClasses += 'social ';
+            
+            return `
+                <div class="${cardClasses}" style="${!p.premium && !p.isSocial ? 'border-top: 4px solid var(--primary)' : ''}">
+                    ${p.popular ? '<div class="popular-badge" style="background:var(--secondary);">El más vendido</div>' : ''}
+                    <div class="card-icon"><i data-lucide="${p.icon || 'wifi'}"></i></div>
                     <h3>${p.name}</h3>
                     <p class="plan-desc">${p.desc}</p>
-                    <div class="price"><span>$</span>${formatted}<span class="price-extra">COP/mes (Tu tarifa de Estrato ${user.estrato})</span></div>
+                    <div class="price" style="font-size: 2.2rem;">${priceHtml}<span class="price-extra">${p.price === 0 ? 'Limitado a 1h/usuario' : 'COP/mes (Tarifa Estrato ' + user.estrato + ')'}</span></div>
                     <ul class="features">
-                        <li><i data-lucide="check-circle-2"></i> ${p.speed} Simétricos</li>
-                        <li><i data-lucide="check-circle-2"></i> Instalación Gratis</li>
-                        ${isPremium ? '<li><i data-lucide="check-circle-2"></i> Soporte VIP 24/7</li>' : ''}
+                        <li><i data-lucide="check-circle-2"></i> ${p.speed}</li>
+                        ${p.premium ? '<li><i data-lucide="check-circle-2"></i> Soporte VIP Exclusivo</li>' : ''}
                     </ul>
-                    <button class="btn-primary w-100" onclick="alert('Simulación: Solicitud de contratación enviada al sistema.')" style="margin-top: 1.5rem;">Adquirir Plan</button>
+                    <button class="btn-primary w-100" onclick="alert('Simulación: Solicitud de contratación de ${p.name} enviada al sistema.')" style="margin-top: 1.5rem;">Adquirir Plan</button>
                 </div>
             `;
-        });
-        
+        }
+
+        if (isRural) {
+            const subtitleLocation = document.getElementById('dash-location');
+            if(subtitleLocation && !subtitleLocation.innerHTML.includes('Rural')) {
+                 subtitleLocation.innerHTML += ' <span style="color:#10b981;">(Zona Rural)</span>';
+            }
+            plans = [
+                { name: "Internet Gratuito", speed: "5-10 Mbps compartidos", price: 0, desc: "Estratégico en Parque/Centro. Alto impacto social.", icon: "heart", isSocial: true },
+                { name: "Plan Básico Rural", speed: "10-20 Mbps", price: 25000 + (10000 * boost), desc: "WhatsApp, YouTube básico, clases.", icon: "home" },
+                { name: "Plan Rural Estándar", speed: "30-50 Mbps", price: 40000 + (15000 * boost), desc: "Nuestro plan de mayor prestigio en el campo.", popular: true, icon: "zap" },
+                { name: "Plan Rural Plus", speed: "60-80 Mbps", price: 60000 + (15000 * boost), desc: "Para hogares que necesitan mayor potencia.", icon: "rocket" },
+            ];
+            html += `<div style="grid-column: 1/-1;"><h3 style="color:var(--primary); font-size:1.8rem;">Planes Rurales (Hogar)</h3><p style="color: var(--text-muted); margin-bottom: 1rem;">Costo de instalación: Mínimo impacto | Opciones de Router financiado a $5.000/mes.</p></div>`;
+            plans.forEach(p => { html += renderSpecificCard(p, user); });
+        } else {
+            const subtitleLocation = document.getElementById('dash-location');
+            if(subtitleLocation && !subtitleLocation.innerHTML.includes('Casco Urbano')) {
+                 subtitleLocation.innerHTML += ' <span style="color:#b000ff;">(Casco Urbano)</span>';
+            }
+            plans = [
+                { name: "Plan Básico Urbano", speed: "50 Mbps", price: 55000 + (10000 * boost), desc: "Ideal para un consumo moderado y redes sociales.", icon: "home" },
+                { name: "Plan Estándar Urbano", speed: "100 Mbps", price: 70000 + (15000 * boost), popular: true, desc: "El favorito en toda la ciudad. Mejor costo/beneficio.", icon: "zap" },
+                { name: "Plan Premium Urbano", speed: "200-300 Mbps", price: 95000 + (25000 * boost), premium: true, desc: "La más alta capacidad para gamers y múltiples TVs.", icon: "rocket" },
+            ];
+            html += `<div style="grid-column: 1/-1;"><h3 style="color:var(--primary); font-size:1.8rem;">Planes Hogar Urbanos</h3><p style="color: var(--text-muted); margin-bottom: 1rem;">Costo de instalación: Estándar | Opción de Router de última generación financiado desde $5.000/mes.</p></div>`;
+            plans.forEach(p => { html += renderSpecificCard(p, user); });
+
+            const businessPlans = [
+                { name: "Pyme Básico", speed: "100 Mbps (Dedicado Parcial)", price: 120000 + (60000 * boost), desc: "Asegura la operatividad de tu pequeño negocio.", icon: "briefcase" },
+                { name: "Pyme Avanzado", speed: "200-300 Mbps", price: 200000 + (150000 * boost), desc: "Ideal para oficinas corporativas.", icon: "building-2" },
+                { name: "Empresarial Dedicado", speed: "Enlace Dedicado Real 1:1", price: 400000 + (600000 * boost), premium: true, desc: "Alta disponibilidad y Uptime del 99.9%.", icon: "server" }
+            ];
+            html += `<div style="grid-column: 1/-1; margin-top:2rem;"><h3 style="color:var(--secondary); font-size:1.8rem;">Planes Empresariales</h3><p style="color: var(--text-muted); margin-bottom: 1rem;">Lleva tu empresa al siguiente nivel con conexiones de misión crítica.</p></div>`;
+            businessPlans.forEach(p => { html += renderSpecificCard(p, user); });
+        }
+
         document.getElementById('dash-plans').innerHTML = html;
         if(window.lucide) lucide.createIcons();
     }
