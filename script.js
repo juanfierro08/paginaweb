@@ -78,6 +78,92 @@ window.addEventListener('scroll', () => {
     }
 });
 
+// Dynamic Pricing Logic
+const planesData = [
+    // Rural
+    { loc: 'rural', stratos: [1], name: 'Vínculo Social', price: '8.613', extra: 'COP/mes', desc: 'Plan subsidiado para el campo', features: ['10 Mbps', 'Ideal para estudio'], type: 'social', popular: false, icon: 'heart' },
+    { loc: 'rural', stratos: [2], name: 'Conexión Campo', price: '19.074', extra: 'COP/mes', desc: 'Internet rural familiar', features: ['20 Mbps', 'Navegación general'], type: 'social', popular: true, icon: 'home' },
+    { loc: 'rural', stratos: [3,4,5,6], name: 'Satélite Extremo', price: '150.000', extra: 'COP/mes + antena', desc: 'Internet satelital de alta cobertura', features: ['Cobertura total', 'Instalación remota'], type: 'standard', popular: false, icon: 'satellite' },
+    
+    // Ciudad (1,2,3)
+    { loc: 'ciudad', stratos: [1,2,3], name: 'Ciudad Popular', price: '58.900', extra: 'COP/mes (Exento IVA)', desc: 'Fibra rápida y económica', features: ['200 Mbps Fibra', 'Router Wi-Fi 6'], type: 'social', popular: false, icon: 'home' },
+    { loc: 'ciudad', stratos: [1,2,3], name: 'Ciudad Plus', price: '69.500', extra: 'COP/mes (Exento IVA)', desc: 'Más velocidad, mismo estrato', features: ['400 Mbps Fibra', 'Soporte 24/7'], type: 'standard', popular: true, icon: 'zap' },
+    
+    // Ciudad (4,5,6)
+    { loc: 'ciudad', stratos: [4,5,6], name: 'Ciudad Pro', price: '82.700', extra: 'COP/mes (Con IVA)', desc: 'Velocidad y latencia baja', features: ['600 Mbps Fibra', 'Ping < 5ms'], type: 'standard', popular: false, icon: 'gamepad-2' },
+    { loc: 'ciudad', stratos: [4,5,6], name: 'Premium Total', price: '149.900', extra: 'COP/mes (Con IVA)', desc: 'Para usuarios ultra exigentes', features: ['1000 Mbps Fibra', 'Enlace Dedicado', 'Repetidor Mesh'], type: 'premium', popular: true, icon: 'building-2' }
+];
+
+const qForm = document.getElementById('qualification-form');
+const dynamicPlansContainer = document.getElementById('dynamic-plans');
+const resultsHeader = document.getElementById('results-header');
+
+function renderPlans(loc, estrato, userName) {
+    if (!dynamicPlansContainer) return;
+
+    const filtered = planesData.filter(p => p.loc === loc && p.stratos.includes(estrato));
+
+    if (filtered.length === 0) {
+        dynamicPlansContainer.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">Lo sentimos, no hay planes definidos para esta combinación temporalmente.</p>';
+    } else {
+        const html = filtered.map(plan => `
+            <div class="service-card ${plan.type} ${plan.popular ? 'popular' : ''}">
+                ${plan.popular ? '<div class="popular-badge">Recomendado</div>' : ''}
+                <div class="card-icon"><i data-lucide="${plan.icon}"></i></div>
+                <h3>${plan.name}</h3>
+                <p class="plan-desc">${plan.desc}</p>
+                <div class="price"><span>$</span>${plan.price}<span class="price-extra">${plan.extra}</span></div>
+                <ul class="features">
+                    ${plan.features.map(f => `<li><i data-lucide="check-circle-2"></i> ${f}</li>`).join('')}
+                </ul>
+                <a href="#contact" class="btn-card">Lo quiero</a>
+            </div>
+        `).join('');
+        dynamicPlansContainer.innerHTML = html;
+    }
+
+    if(window.lucide) {
+         lucide.createIcons();
+    }
+    
+    // Configurar y mostrar el header de resultados
+    if(resultsHeader) {
+        // Obtenemos solo el primer nombre
+        const firstName = userName.split(' ')[0];
+        resultsHeader.innerHTML = `<h3>¡Hola <span class="gradient-text">${firstName}</span>!</h3><p style="color: var(--text-muted); margin-top: 0.5rem; font-size: 1.1rem;">Estos son los planes disponibles con cobertura total para el <b>Estrato ${estrato}</b> en zona <b>${loc === 'ciudad' ? 'Urbana' : 'Rural'}</b>:</p>`;
+        resultsHeader.style.display = 'block';
+    }
+    
+    dynamicPlansContainer.style.display = 'grid';
+    
+    // Smooth scroll to results
+    setTimeout(() => {
+        resultsHeader.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 150);
+}
+
+if (qForm) {
+    qForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const btn = qForm.querySelector('button[type="submit"]');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = 'Verificando cobertura...';
+        btn.style.opacity = '0.8';
+        
+        setTimeout(() => {
+            const loc = document.getElementById('q-ubicacion').value;
+            const estrato = parseInt(document.getElementById('q-estrato').value);
+            const name = document.getElementById('q-nombre').value;
+            
+            btn.innerHTML = originalText;
+            btn.style.opacity = '1';
+            
+            renderPlans(loc, estrato, name);
+        }, 800); 
+    });
+}
+
 // Dynamic counter animation
 function animateValue(obj, start, end, duration) {
     let startTimestamp = null;

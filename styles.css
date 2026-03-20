@@ -137,6 +137,62 @@ body {
     gap: 2rem;
 }
 
+/* Qualification Form */
+.qualification-container {
+    max-width: 700px;
+    margin: 0 auto 4rem auto;
+    background: rgba(17, 24, 39, 0.6);
+    backdrop-filter: blur(12px);
+    padding: 2.5rem;
+    border-radius: 20px;
+    border: 1px solid var(--card-border);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+}
+.qualify-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+.input-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+}
+.input-group label {
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+.qualify-form input, .custom-select {
+    padding: 1rem 1.2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    color: white;
+    font-family: inherit;
+    font-size: 1rem;
+    outline: none;
+    transition: var(--transition);
+    width: 100%;
+}
+.qualify-form input:focus, .custom-select:focus {
+    border-color: var(--primary);
+    background: rgba(0, 242, 255, 0.05);
+}
+.w-100 { width: 100%; }
+.mt-2 { margin-top: 1rem; }
+
+@media (max-width: 600px) {
+    .input-row { grid-template-columns: 1fr; gap: 1.5rem; }
+    .qualification-container { padding: 1.5rem; }
+}
+
 .service-card {
     background: var(--bg-card);
     border: 1px solid var(--card-border);
@@ -145,6 +201,56 @@ body {
     transition: var(--transition);
 }
 .service-card:hover { transform: translateY(-10px); }
+
+/* Custom Badge Extenders */
+.service-card .price-extra {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: #fbbf24;
+    font-weight: 400;
+}
+.service-card .plan-desc {
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+    color: var(--text-muted);
+}
+
+/* Theme overrides */
+.service-card.social {
+    background: linear-gradient(180deg, rgba(16, 185, 129, 0.05) 0%, var(--bg-card) 100%);
+    border-color: rgba(16, 185, 129, 0.4);
+}
+.service-card.social::before {
+    background: linear-gradient(90deg, #10b981, #059669);
+}
+.service-card.social .price, .service-card.social .card-icon i, .service-card.social .features li i {
+    color: #10b981;
+}
+.service-card.social .card-icon {
+    background: rgba(16, 185, 129, 0.15);
+}
+.service-card.social .btn-card {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: #10b981;
+    color: #10b981;
+}
+.service-card.social:hover .btn-card {
+    background: #10b981;
+    color: white;
+}
+
+.service-card.premium {
+    background: rgba(17, 24, 39, 0.8);
+    border-color: rgba(176, 0, 255, 0.5);
+    transform: scale(1.05);
+}
+.service-card.premium::before {
+    background: var(--gradient);
+}
+.service-card.premium:hover {
+    transform: scale(1.05) translateY(-10px);
+}
 
 .card-icon {
     width: 60px;

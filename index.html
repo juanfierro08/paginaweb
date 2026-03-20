@@ -55,37 +55,55 @@
 
     <section id="services" class="services-section">
         <div class="section-header">
-            <h2>Nuestros <span class="gradient-text">Planes de Fibra</span></h2>
+            <h2>Planes a tu <span class="gradient-text">Medida</span></h2>
+            <p style="margin-top: 0.5rem; color: var(--text-muted);">Selecciona tu zona de vivienda y estrato socioeconómico para ver las tarifas reales en Colombia.</p>
         </div>
-        <div class="services-grid">
-            <div class="service-card">
-                <div class="card-icon"><i data-lucide="home"></i></div>
-                <h3>Plan Hogar</h3>
-                <div class="price"><span>$</span>75.000<span> COP/mes</span></div>
-                <ul class="features">
-                    <li><i data-lucide="check-circle-2"></i> 200 Mbps Simétricos</li>
-                    <li><i data-lucide="check-circle-2"></i> Router Wi-Fi 6</li>
-                </ul>
-            </div>
-            <div class="service-card popular">
-                <div class="popular-badge">Gamer</div>
-                <div class="card-icon"><i data-lucide="gamepad-2"></i></div>
-                <h3>Plan Ultra</h3>
-                <div class="price"><span>$</span>120.000<span> COP/mes</span></div>
-                <ul class="features">
-                    <li><i data-lucide="check-circle-2"></i> 600 Mbps Simétricos</li>
-                    <li><i data-lucide="check-circle-2"></i> Latencia Optimizada (< 5ms)</li>
-                </ul>
-            </div>
-            <div class="service-card">
-                <div class="card-icon"><i data-lucide="building-2"></i></div>
-                <h3>Plan Pro</h3>
-                <div class="price"><span>$</span>180.000<span> COP/mes</span></div>
-                <ul class="features">
-                    <li><i data-lucide="check-circle-2"></i> 1000 Mbps</li>
-                    <li><i data-lucide="check-circle-2"></i> Enlace Dedicado</li>
-                </ul>
-            </div>
+        
+        <div class="qualification-container">
+            <form id="qualification-form" class="qualify-form">
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Nombre Completo</label>
+                        <input type="text" id="q-nombre" required placeholder="Ej. Juan Pérez">
+                    </div>
+                    <div class="input-group">
+                        <label>Celular</label>
+                        <input type="tel" id="q-celular" required placeholder="Ej. 300 000 0000">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Correo Electrónico</label>
+                    <input type="email" id="q-correo" required placeholder="tucorreo@ejemplo.com">
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Lugar de Residencia</label>
+                        <select id="q-ubicacion" required class="custom-select w-100">
+                            <option value="" disabled selected>Selecciona tu zona...</option>
+                            <option value="ciudad">Ciudad (Casco Urbano)</option>
+                            <option value="rural">Campo (Vereda / Rural)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Estrato</label>
+                        <select id="q-estrato" required class="custom-select w-100">
+                            <option value="" disabled selected>Selecciona tu estrato...</option>
+                            <option value="1">Estrato 1</option>
+                            <option value="2">Estrato 2</option>
+                            <option value="3">Estrato 3</option>
+                            <option value="4">Estrato 4</option>
+                            <option value="5">Estrato 5</option>
+                            <option value="6">Estrato 6</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary w-100 mt-2">Consultar Cobertura y Planes</button>
+            </form>
+        </div>
+
+        <div id="results-header" style="text-align: center; margin-bottom: 3rem; display: none;"></div>
+        <div id="dynamic-plans" class="services-grid" style="display: none;">
+            <!-- Los planes se insertarán aquí dinámicamente con JS -->
         </div>
     </section>
 
