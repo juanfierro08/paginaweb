@@ -77,25 +77,29 @@
                 </div>
                 <div class="input-row">
                     <div class="input-group">
-                        <label>Lugar de Residencia</label>
-                        <select id="q-ubicacion" required class="custom-select w-100">
-                            <option value="" disabled selected>Selecciona tu zona...</option>
-                            <option value="ciudad">Ciudad (Casco Urbano)</option>
-                            <option value="rural">Campo (Vereda / Rural)</option>
-                        </select>
+                        <label>Ciudad o Municipio (Colombia)</label>
+                        <input type="text" id="q-municipio" required placeholder="Ej. Medellín, vereda...">
                     </div>
                     <div class="input-group">
-                        <label>Estrato</label>
-                        <select id="q-estrato" required class="custom-select w-100">
-                            <option value="" disabled selected>Selecciona tu estrato...</option>
-                            <option value="1">Estrato 1</option>
-                            <option value="2">Estrato 2</option>
-                            <option value="3">Estrato 3</option>
-                            <option value="4">Estrato 4</option>
-                            <option value="5">Estrato 5</option>
-                            <option value="6">Estrato 6</option>
+                        <label>Tipo de Zona</label>
+                        <select id="q-ubicacion" required class="custom-select w-100">
+                            <option value="" disabled selected>Elegir zona...</option>
+                            <option value="ciudad">Ciudad (Barrios / Urbano)</option>
+                            <option value="rural">Campo (Vereda / Finca)</option>
                         </select>
                     </div>
+                </div>
+                <div class="input-group">
+                    <label>Estrato Socioeconómico</label>
+                    <select id="q-estrato" required class="custom-select w-100">
+                        <option value="" disabled selected>Selecciona tu estrato...</option>
+                        <option value="1">Estrato 1 (Bajo-Bajo)</option>
+                        <option value="2">Estrato 2 (Bajo)</option>
+                        <option value="3">Estrato 3 (Medio-Bajo)</option>
+                        <option value="4">Estrato 4 (Medio)</option>
+                        <option value="5">Estrato 5 (Medio-Alto)</option>
+                        <option value="6">Estrato 6 (Alto)</option>
+                    </select>
                 </div>
                 <button type="submit" class="btn-primary w-100 mt-2">Consultar Cobertura y Planes</button>
             </form>

@@ -148,19 +148,46 @@ if (qForm) {
         
         const btn = qForm.querySelector('button[type="submit"]');
         const originalText = btn.innerHTML;
-        btn.innerHTML = 'Verificando cobertura...';
+        btn.innerHTML = 'Guardando tus datos y buscando planes...';
         btn.style.opacity = '0.8';
         
-        setTimeout(() => {
-            const loc = document.getElementById('q-ubicacion').value;
-            const estrato = parseInt(document.getElementById('q-estrato').value);
-            const name = document.getElementById('q-nombre').value;
-            
+        const loc = document.getElementById('q-ubicacion').value;
+        const estrato = parseInt(document.getElementById('q-estrato').value);
+        const name = document.getElementById('q-nombre').value;
+        const phone = document.getElementById('q-celular').value;
+        const email = document.getElementById('q-correo').value;
+        const municipio = document.getElementById('q-municipio').value;
+
+        // Enviar datos en segundo plano usando FormSubmit
+        // ¡REEMPLAZA 'TU_CORREO_AQUI@gmail.com' POR TU CORREO REAL!
+        fetch("https://formsubmit.co/ajax/TU_CORREO_AQUI@gmail.com", {
+            method: "POST",
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                Nombre: name,
+                Celular: phone,
+                Correo: email,
+                Municipio: municipio,
+                Zona: loc === 'ciudad' ? 'Urbana' : 'Rural',
+                Estrato: estrato,
+                _subject: "Nuevo Lead de Internet: " + name
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
             btn.innerHTML = originalText;
             btn.style.opacity = '1';
-            
             renderPlans(loc, estrato, name);
-        }, 800); 
+        })
+        .catch(error => {
+            // Aún si falla el envío por un adblock o red, mostramos los planes al cliente
+            btn.innerHTML = originalText;
+            btn.style.opacity = '1';
+            renderPlans(loc, estrato, name);
+        });
     });
 }
 
