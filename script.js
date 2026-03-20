@@ -1,241 +1,251 @@
-lucide.createIcons();
+// FixNet - SPA Core App
 
-// Mobile Navigation Toggle
-const hamburger = document.querySelector('.hamburger');
-const navLinks = document.querySelector('.nav-links');
-
-if (hamburger) {
-    hamburger.addEventListener('click', () => {
-        navLinks.classList.toggle('active');
-        const icon = hamburger.querySelector('i');
-        if (navLinks.classList.contains('active')) {
-            icon.setAttribute('data-lucide', 'x');
-        } else {
-            icon.setAttribute('data-lucide', 'menu');
-        }
-        lucide.createIcons();
-    });
-}
-
-// Close mobile menu when clicking a link
-document.querySelectorAll('.nav-links a').forEach(link => {
-    link.addEventListener('click', () => {
-        if (navLinks.classList.contains('active')) {
-            navLinks.classList.remove('active');
-            const icon = hamburger.querySelector('i');
-            icon.setAttribute('data-lucide', 'menu');
-            lucide.createIcons();
-        }
-    });
-});
-
-// Smooth scrolling for anchor links
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const targetId = this.getAttribute('href');
-        if (targetId === '#') return;
+// --- ROUTER ---
+const router = {
+    navigate: function(viewId) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById('view-' + viewId).classList.add('active');
         
-        const targetElement = document.querySelector(targetId);
-        if (targetElement) {
-            window.scrollTo({
-                top: targetElement.offsetTop - 80,
-                behavior: 'smooth'
+        // Hide standard nav if in auth
+        if(viewId === 'auth' || viewId === 'onboarding') {
+            document.getElementById('nav-public').style.display = 'none';
+            document.getElementById('nav-private').style.display = 'none';
+        } else if(auth.isLoggedIn() && viewId !== 'landing') {
+            document.getElementById('nav-public').style.display = 'none';
+            document.getElementById('nav-private').style.display = 'flex';
+        } else {
+            document.getElementById('nav-public').style.display = 'flex';
+            document.getElementById('nav-private').style.display = 'none';
+        }
+
+        window.scrollTo(0, 0);
+        
+        // Trigger view-specific logic
+        if(viewId === 'dashboard') dashboard.init();
+        if(viewId === 'landing') {
+            // Optional redirect check here
+        }
+        if(window.lucide) lucide.createIcons();
+    }
+};
+
+// --- AUTHENTICATION & USER DB ---
+const auth = {
+    isLoggedIn: () => localStorage.getItem('fixnet_user') !== null,
+    getUser: () => JSON.parse(localStorage.getItem('fixnet_user')),
+    
+    toggleMode: function() {
+        const loginForm = document.getElementById('login-form');
+        const regForm = document.getElementById('register-form');
+        const title = document.getElementById('auth-title');
+        const subtitle = document.getElementById('auth-subtitle');
+        
+        if(loginForm.style.display === 'none') {
+            loginForm.style.display = 'flex';
+            regForm.style.display = 'none';
+            title.innerHTML = 'Inicia <span class="gradient-text">Sesión</span>';
+            subtitle.innerText = 'Accede a tu portal FixNet';
+        } else {
+            loginForm.style.display = 'none';
+            regForm.style.display = 'flex';
+            title.innerHTML = 'Crea tu <span class="gradient-text">Cuenta</span>';
+            subtitle.innerText = 'Únete al internet del futuro';
+        }
+    },
+    
+    login: function(e) {
+        e.preventDefault();
+        const em = document.getElementById('login-email').value;
+        const pass = document.getElementById('login-password').value;
+        const users = JSON.parse(localStorage.getItem('fixnet_db') || '[]');
+        
+        const user = users.find(u => u.email === em && u.password === pass);
+        if(user) {
+            localStorage.setItem('fixnet_user', JSON.stringify(user));
+            if(!user.onboarded) router.navigate('onboarding');
+            else router.navigate('dashboard');
+        } else {
+            alert("Credenciales incorrectas o usuario no existe.");
+        }
+    },
+    
+    register: function(e) {
+        e.preventDefault();
+        const name = document.getElementById('reg-name').value;
+        const em = document.getElementById('reg-email').value;
+        const pass = document.getElementById('reg-password').value;
+        
+        const users = JSON.parse(localStorage.getItem('fixnet_db') || '[]');
+        if(users.find(u => u.email === em)) {
+            alert("El correo ya está registrado.");
+            return;
+        }
+        
+        const newUser = { name, email: em, password: pass, onboarded: false };
+        users.push(newUser);
+        localStorage.setItem('fixnet_db', JSON.stringify(users));
+        localStorage.setItem('fixnet_user', JSON.stringify(newUser));
+        
+        // Auto login and go to onboarding
+        router.navigate('onboarding');
+    },
+    
+    saveOnboarding: function(e) {
+        e.preventDefault();
+        const depto = document.getElementById('ob-depto').value;
+        const ciudad = document.getElementById('ob-ciudad').value;
+        const zona = document.getElementById('ob-zona').value;
+        const estrato = parseInt(document.getElementById('ob-estrato').value);
+        
+        const currentUser = this.getUser();
+        currentUser.depto = depto;
+        currentUser.ciudad = ciudad;
+        currentUser.zona = zona;
+        currentUser.estrato = estrato;
+        currentUser.onboarded = true;
+        
+        // Update user in DB
+        const users = JSON.parse(localStorage.getItem('fixnet_db'));
+        const index = users.findIndex(u => u.email === currentUser.email);
+        users[index] = currentUser;
+        
+        localStorage.setItem('fixnet_db', JSON.stringify(users));
+        localStorage.setItem('fixnet_user', JSON.stringify(currentUser));
+        
+        router.navigate('dashboard');
+    },
+    
+    logout: function() {
+        localStorage.removeItem('fixnet_user');
+        router.navigate('landing');
+    }
+};
+
+// --- DASHBOARD LOGIC ---
+const dashboard = {
+    init: function() {
+        const user = auth.getUser();
+        if(!user) return router.navigate('auth');
+        
+        document.getElementById('dash-name').innerText = user.name.split(' ')[0];
+        document.getElementById('dash-location').innerHTML = `<b>Ubicación:</b> ${user.ciudad}, ${user.depto} (Estrato ${user.estrato})`;
+        
+        // Random Status logic
+        const statusEl = document.getElementById('dash-status');
+        if(Math.random() > 0.8) {
+            statusEl.className = 'status-badge error-status';
+            statusEl.innerHTML = '<i data-lucide="alert-triangle"></i> Se presentan fallas en tu zona';
+        } else {
+            statusEl.className = 'status-badge normal-status';
+            statusEl.innerHTML = '<i data-lucide="check-circle-2"></i> Servicio funcionando con normalidad';
+        }
+        
+        this.renderPlans(user);
+    },
+    
+    renderPlans: function(user) {
+        // Base Plans
+        const basePlans = [
+            { name: "Plan Básico", speed: "50 Mbps", basePrice: 40000, desc: "Para navegación y tareas", icon: "wifi" },
+            { name: "Plan Estándar", speed: "200 Mbps", basePrice: 70000, desc: "Streaming y teletrabajo ideal", icon: "zap" },
+            { name: "Plan Premium", speed: "600 Mbps", basePrice: 120000, desc: "Gamer, 4K y múltiples dispositivos", icon: "rocket" }
+        ];
+        
+        // Modifier function based on stratum (1 to 6)
+        let multiplier = 1;
+        if(user.estrato === 1) multiplier = 0.5;
+        if(user.estrato === 2) multiplier = 0.7;
+        if(user.estrato === 3) multiplier = 0.9;
+        if(user.estrato === 4) multiplier = 1.1;
+        if(user.estrato === 5) multiplier = 1.4;
+        if(user.estrato === 6) multiplier = 1.8;
+        
+        let html = '';
+        basePlans.forEach(p => {
+            const finalPrice = Math.floor(p.basePrice * multiplier);
+            // Format number
+            const formatted = finalPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            const isPremium = p.name.includes("Premium");
+            
+            html += `
+                <div class="service-card ${isPremium ? 'premium' : ''}" style="${isPremium ? '' : 'border-top: 4px solid var(--primary)'}">
+                    ${isPremium ? '<div class="popular-badge">Recomendado</div>' : ''}
+                    <div class="card-icon"><i data-lucide="${p.icon}"></i></div>
+                    <h3>${p.name}</h3>
+                    <p class="plan-desc">${p.desc}</p>
+                    <div class="price"><span>$</span>${formatted}<span class="price-extra">COP/mes (Tu tarifa de Estrato ${user.estrato})</span></div>
+                    <ul class="features">
+                        <li><i data-lucide="check-circle-2"></i> ${p.speed} Simétricos</li>
+                        <li><i data-lucide="check-circle-2"></i> Instalación Gratis</li>
+                        ${isPremium ? '<li><i data-lucide="check-circle-2"></i> Soporte VIP 24/7</li>' : ''}
+                    </ul>
+                    <button class="btn-primary w-100" onclick="alert('Simulación: Solicitud de contratación enviada al sistema.')" style="margin-top: 1.5rem;">Adquirir Plan</button>
+                </div>
+            `;
+        });
+        
+        document.getElementById('dash-plans').innerHTML = html;
+        if(window.lucide) lucide.createIcons();
+    }
+};
+
+// --- SUPPORT SYSTEM ---
+const support = {
+    init: function() {
+        const supForm = document.getElementById('support-form');
+        if(supForm) {
+            supForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const issue = document.getElementById('sup-issue').value;
+                const resBox = document.getElementById('support-response');
+                const resText = document.getElementById('sup-text');
+                
+                resBox.style.display = 'block';
+                resText.innerHTML = "<em>Diagnosticando línea mediante IA FixNet...</em>";
+                
+                setTimeout(() => {
+                    let answer = "";
+                    switch(issue) {
+                        case 'noconn': answer = "Hemos detectado que tu módem no recibe señal óptica (Luz LOS roja o apagada). Por favor verifica que el cable de fibra amarillo no esté doblado abruptamente. Si está bien, agendaremos una visita técnica automática en las próximas 4h."; break;
+                        case 'slow': answer = "Tu conexión a la central FixNet responde bien. Te sugerimos desconectar el router de la corriente por 10 segundos para limpiar la caché y conectarte por cable de red si necesitas máxima velocidad."; break;
+                        case 'intermit': answer = "Revisamos los parámetros y vemos ligeras variaciones de potencia óptica. Hemos enviado un comando remoto para estabilizar tus canales Wi-Fi. Reinicia tus dispositivos en 5 minutos."; break;
+                        case 'router': answer = "Asegúrate de que el router esté en un lugar abierto, no dentro de muebles ni cerca de microondas. Si notas luces apagadas o diferentes, puedes solicitar un cambio de equipo desde tu Dashboard."; break;
+                        default: answer = "Necesitamos más detalles. Escribe debajo en el chat para comunicarte con un agente real (Simulado).";
+                    }
+                    resText.innerHTML = "<b>🩺 Solución Automática:</b><br><br>" + answer;
+                }, 1500);
             });
         }
-    });
-});
+    }
+}
 
 // FAQ Accordion
-const faqItems = document.querySelectorAll('.faq-item');
-faqItems.forEach(item => {
-    const question = item.querySelector('.faq-question');
-    question.addEventListener('click', () => {
-        const isActive = item.classList.contains('active');
-        
-        faqItems.forEach(otherItem => {
-            otherItem.classList.remove('active');
-            const otherQuestion = otherItem.querySelector('.faq-question');
-            if(otherQuestion) otherQuestion.classList.remove('active');
+document.querySelectorAll('.faq-question').forEach(button => {
+    button.addEventListener('click', () => {
+        const item = button.parentElement;
+        document.querySelectorAll('.faq-item').forEach(faq => {
+            if (faq !== item) faq.classList.remove('active');
         });
-        
-        if (!isActive) {
-            item.classList.add('active');
-            question.classList.add('active');
-        }
+        item.classList.toggle('active');
     });
 });
 
-// Navbar background on scroll
-window.addEventListener('scroll', () => {
-    const navbar = document.querySelector('.navbar');
-    if (window.scrollY > 50) {
-        navbar.style.background = 'rgba(6, 9, 19, 0.95)';
-        navbar.style.boxShadow = '0 4px 30px rgba(0, 0, 0, 0.1)';
+// BIND EVENTS
+document.getElementById('login-form').addEventListener('submit', auth.login);
+document.getElementById('register-form').addEventListener('submit', auth.register);
+document.getElementById('onboarding-form').addEventListener('submit', e => auth.saveOnboarding(e));
+
+// INITIALIZE
+window.onload = () => {
+    if(window.lucide) lucide.createIcons();
+    support.init();
+    
+    // Auto-route based on session
+    if(auth.isLoggedIn()) {
+        const user = auth.getUser();
+        if(!user.onboarded) router.navigate('onboarding');
+        else router.navigate('dashboard');
     } else {
-        navbar.style.background = 'rgba(6, 9, 19, 0.8)';
-        navbar.style.boxShadow = 'none';
+        router.navigate('landing');
     }
-});
-
-// Dynamic Pricing Logic
-const planesData = [
-    // Rural
-    { loc: 'rural', stratos: [1], name: 'Vínculo Social', price: '8.613', extra: 'COP/mes', desc: 'Plan subsidiado para el campo', features: ['10 Mbps', 'Ideal para estudio'], type: 'social', popular: false, icon: 'heart' },
-    { loc: 'rural', stratos: [2], name: 'Conexión Campo', price: '19.074', extra: 'COP/mes', desc: 'Internet rural familiar', features: ['20 Mbps', 'Navegación general'], type: 'social', popular: true, icon: 'home' },
-    { loc: 'rural', stratos: [3,4,5,6], name: 'Satélite Extremo', price: '150.000', extra: 'COP/mes + antena', desc: 'Internet satelital de alta cobertura', features: ['Cobertura total', 'Instalación remota'], type: 'standard', popular: false, icon: 'satellite' },
-    
-    // Ciudad (1,2,3)
-    { loc: 'ciudad', stratos: [1,2,3], name: 'Ciudad Popular', price: '58.900', extra: 'COP/mes (Exento IVA)', desc: 'Fibra rápida y económica', features: ['200 Mbps Fibra', 'Router Wi-Fi 6'], type: 'social', popular: false, icon: 'home' },
-    { loc: 'ciudad', stratos: [1,2,3], name: 'Ciudad Plus', price: '69.500', extra: 'COP/mes (Exento IVA)', desc: 'Más velocidad, mismo estrato', features: ['400 Mbps Fibra', 'Soporte 24/7'], type: 'standard', popular: true, icon: 'zap' },
-    
-    // Ciudad (4,5,6)
-    { loc: 'ciudad', stratos: [4,5,6], name: 'Ciudad Pro', price: '82.700', extra: 'COP/mes (Con IVA)', desc: 'Velocidad y latencia baja', features: ['600 Mbps Fibra', 'Ping < 5ms'], type: 'standard', popular: false, icon: 'gamepad-2' },
-    { loc: 'ciudad', stratos: [4,5,6], name: 'Premium Total', price: '149.900', extra: 'COP/mes (Con IVA)', desc: 'Para usuarios ultra exigentes', features: ['1000 Mbps Fibra', 'Enlace Dedicado', 'Repetidor Mesh'], type: 'premium', popular: true, icon: 'building-2' }
-];
-
-const qForm = document.getElementById('qualification-form');
-const dynamicPlansContainer = document.getElementById('dynamic-plans');
-const resultsHeader = document.getElementById('results-header');
-
-function renderPlans(loc, estrato, userName) {
-    if (!dynamicPlansContainer) return;
-
-    const filtered = planesData.filter(p => p.loc === loc && p.stratos.includes(estrato));
-
-    if (filtered.length === 0) {
-        dynamicPlansContainer.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">Lo sentimos, no hay planes definidos para esta combinación temporalmente.</p>';
-    } else {
-        const html = filtered.map(plan => `
-            <div class="service-card ${plan.type} ${plan.popular ? 'popular' : ''}">
-                ${plan.popular ? '<div class="popular-badge">Recomendado</div>' : ''}
-                <div class="card-icon"><i data-lucide="${plan.icon}"></i></div>
-                <h3>${plan.name}</h3>
-                <p class="plan-desc">${plan.desc}</p>
-                <div class="price"><span>$</span>${plan.price}<span class="price-extra">${plan.extra}</span></div>
-                <ul class="features">
-                    ${plan.features.map(f => `<li><i data-lucide="check-circle-2"></i> ${f}</li>`).join('')}
-                </ul>
-                <a href="#contact" class="btn-card">Lo quiero</a>
-            </div>
-        `).join('');
-        dynamicPlansContainer.innerHTML = html;
-    }
-
-    if(window.lucide) {
-         lucide.createIcons();
-    }
-    
-    // Configurar y mostrar el header de resultados
-    if(resultsHeader) {
-        // Obtenemos solo el primer nombre
-        const firstName = userName.split(' ')[0];
-        resultsHeader.innerHTML = `<h3>¡Hola <span class="gradient-text">${firstName}</span>!</h3><p style="color: var(--text-muted); margin-top: 0.5rem; font-size: 1.1rem;">Estos son los planes disponibles con cobertura total para el <b>Estrato ${estrato}</b> en zona <b>${loc === 'ciudad' ? 'Urbana' : 'Rural'}</b>:</p>`;
-        resultsHeader.style.display = 'block';
-    }
-    
-    dynamicPlansContainer.style.display = 'grid';
-    
-    // Smooth scroll to results
-    setTimeout(() => {
-        resultsHeader.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 150);
-}
-
-if (qForm) {
-    qForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        const btn = qForm.querySelector('button[type="submit"]');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = 'Guardando tus datos y buscando planes...';
-        btn.style.opacity = '0.8';
-        
-        const loc = document.getElementById('q-ubicacion').value;
-        const estrato = parseInt(document.getElementById('q-estrato').value);
-        const name = document.getElementById('q-nombre').value;
-        const phone = document.getElementById('q-celular').value;
-        const email = document.getElementById('q-correo').value;
-        const municipio = document.getElementById('q-municipio').value;
-
-        // Enviar datos en segundo plano usando FormSubmit
-        // ¡REEMPLAZA 'TU_CORREO_AQUI@gmail.com' POR TU CORREO REAL!
-        fetch("https://formsubmit.co/ajax/TU_CORREO_AQUI@gmail.com", {
-            method: "POST",
-            headers: { 
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                Nombre: name,
-                Celular: phone,
-                Correo: email,
-                Municipio: municipio,
-                Zona: loc === 'ciudad' ? 'Urbana' : 'Rural',
-                Estrato: estrato,
-                _subject: "Nuevo Lead de Internet: " + name
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            btn.innerHTML = originalText;
-            btn.style.opacity = '1';
-            renderPlans(loc, estrato, name);
-        })
-        .catch(error => {
-            // Aún si falla el envío por un adblock o red, mostramos los planes al cliente
-            btn.innerHTML = originalText;
-            btn.style.opacity = '1';
-            renderPlans(loc, estrato, name);
-        });
-    });
-}
-
-// Dynamic counter animation
-function animateValue(obj, start, end, duration) {
-    let startTimestamp = null;
-    const step = (timestamp) => {
-        if (!startTimestamp) startTimestamp = timestamp;
-        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-        const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
-        obj.innerHTML = Math.floor(easeProgress * (end - start) + start);
-        if (progress < 1) {
-            window.requestAnimationFrame(step);
-        }
-    };
-    window.requestAnimationFrame(step);
-}
-
-const speedNumber = document.querySelector('.speed-number');
-let animated = false;
-
-const observer = new IntersectionObserver((entries) => {
-    if (entries[0].isIntersecting && !animated) {
-        animateValue(speedNumber, 0, 1000, 2000);
-        animated = true;
-    }
-});
-
-if (speedNumber) {
-    observer.observe(speedNumber);
-}
-
-// Form handling
-const form = document.querySelector('.contact-form');
-if (form) {
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const btn = form.querySelector('button');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = 'Enviando...';
-        setTimeout(() => {
-            btn.innerHTML = '¡Enviado!';
-            btn.style.background = '#10b981';
-            form.reset();
-            setTimeout(() => {
-                btn.innerHTML = originalText;
-                btn.style.background = '';
-            }, 3000);
-        }, 1500);
-    });
-}
+};
