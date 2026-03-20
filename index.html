@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusNet | Servicios de Internet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <i data-lucide="wifi"></i>
+            <span>NexusNet</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#home">Inicio</a></li>
+            <li><a href="#services">Planes</a></li>
+            <li><a href="#about">Ventajas</a></li>
+            <li><a href="#contact" class="btn-primary">Contáctanos</a></li>
+        </ul>
+        <div class="hamburger">
+            <i data-lucide="menu"></i>
+        </div>
+    </nav>
+
+    <header id="home" class="hero">
+        <div class="hero-content">
+            <h1 class="animate-up">Conecta tu mundo a la <span class="gradient-text">Máxima Velocidad</span></h1>
+            <p class="animate-up delay-1">Fibra óptica ultrarrápida, sin interrupciones y con la mejor cobertura para tu hogar o empresa.</p>
+            <div class="hero-buttons animate-up delay-2">
+                <a href="#services" class="btn-primary">Ver Planes</a>
+                <a href="#contact" class="btn-secondary">Comprobar Cobertura</a>
+            </div>
+        </div>
+        <div class="hero-visual animate-fade-in">
+            <div class="glow-orb orb-1"></div>
+            <div class="glow-orb orb-2"></div>
+            <div class="glass-card main-card">
+                <div class="speed-indicator">
+                    <span class="speed-number">1000</span>
+                    <span class="speed-unit">Mbps</span>
+                </div>
+                <p>Velocidad Simétrica</p>
+                <div class="ping-status">
+                    <i data-lucide="activity"></i> Ping 2ms
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section id="services" class="services-section">
+        <div class="section-header">
+            <h2>Nuestros <span class="gradient-text">Planes de Fibra</span></h2>
+        </div>
+        <div class="services-grid">
+            <div class="service-card">
+                <div class="card-icon"><i data-lucide="home"></i></div>
+                <h3>Plan Hogar</h3>
+                <div class="price"><span>$</span>29.99<span>/mes</span></div>
+                <ul class="features">
+                    <li><i data-lucide="check-circle-2"></i> 200 Mbps Simétricos</li>
+                    <li><i data-lucide="check-circle-2"></i> Router Wi-Fi 6</li>
+                </ul>
+            </div>
+            <div class="service-card popular">
+                <div class="popular-badge">Gamer</div>
+                <div class="card-icon"><i data-lucide="gamepad-2"></i></div>
+                <h3>Plan Ultra</h3>
+                <div class="price"><span>$</span>49.99<span>/mes</span></div>
+                <ul class="features">
+                    <li><i data-lucide="check-circle-2"></i> 600 Mbps Simétricos</li>
+                    <li><i data-lucide="check-circle-2"></i> Latencia Optimizada (< 5ms)</li>
+                </ul>
+            </div>
+            <div class="service-card">
+                <div class="card-icon"><i data-lucide="building-2"></i></div>
+                <h3>Plan Pro</h3>
+                <div class="price"><span>$</span>89.99<span>/mes</span></div>
+                <ul class="features">
+                    <li><i data-lucide="check-circle-2"></i> 1000 Mbps</li>
+                    <li><i data-lucide="check-circle-2"></i> Enlace Dedicado</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="cta-section">
+        <div class="cta-content">
+            <h2>¿Listo para evolucionar tu conexión?</h2>
+            <form class="contact-form">
+                <input type="text" placeholder="Tu Nombre Completo" required>
+                <input type="tel" placeholder="Tu Teléfono" required>
+                <button type="submit" class="btn-primary">Solicitar Instalación</button>
+            </form>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>
