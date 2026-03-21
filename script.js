@@ -32,6 +32,19 @@ const router = {
     }
 };
 
+// --- WEBHOOK ADMIN NOTIFICATIONS ---
+function sendToFixNetAdmin(subject, dataObj) {
+    const formData = new FormData();
+    formData.append("access_key", "d168756e-1083-4c2d-a522-9a0d8cead4f8");
+    formData.append("subject", subject);
+    formData.append("from_name", "Sistema Central FixNet");
+    for (let key in dataObj) {
+        formData.append(key, dataObj[key]);
+    }
+    fetch("https://api.web3forms.com/submit", { method: "POST", body: formData })
+      .catch(err => console.error("Error Web3Forms", err));
+}
+
 // --- AUTHENTICATION & USER DB ---
 const auth = {
     isLoggedIn: () => localStorage.getItem('fixnet_user') !== null,
@@ -89,6 +102,12 @@ const auth = {
         localStorage.setItem('fixnet_db', JSON.stringify(users));
         localStorage.setItem('fixnet_user', JSON.stringify(newUser));
         
+        sendToFixNetAdmin("1. NUEVO USUARIO REGISTRADO: " + name, {
+            Nombre: name,
+            Correo: em,
+            Mensaje: "El cliente acaba de crear su cuenta en FixNet pero aún no ingresa su estrato y barrio."
+        });
+        
         // Auto login and go to onboarding
         router.navigate('onboarding');
     },
@@ -114,6 +133,15 @@ const auth = {
         
         localStorage.setItem('fixnet_db', JSON.stringify(users));
         localStorage.setItem('fixnet_user', JSON.stringify(currentUser));
+        
+        sendToFixNetAdmin("2. PERFIL DE COBERTURA COMPLETADO: " + currentUser.name, {
+            Cliente: currentUser.name,
+            Correo: currentUser.email,
+            Departamento: currentUser.depto,
+            Ciudad: currentUser.ciudad,
+            Zona: currentUser.zona === 'rural' ? "Rural / Campo" : "Urbano / Ciudad",
+            Estrato: currentUser.estrato
+        });
         
         router.navigate('dashboard');
     },
@@ -319,13 +347,29 @@ const dashboard = {
     processCheckout: function(e) {
         e.preventDefault();
         const date = document.getElementById('chk-date').value;
+        const routerOpt = document.getElementById('chk-router');
+        const routerText = routerOpt.options[routerOpt.selectedIndex].text;
         const total = document.getElementById('chk-total-price').innerText;
+        
         alert(`¡Felicidades! Se ha tramitado el contrato de: ${this.currentCheckoutPlan.name}. El técnico asignado te visitará el día ${date}. Tarifa mensual acordada: ${total}.`);
         document.getElementById('checkout-modal').style.display = 'none';
         
         const hist = document.querySelector('#historial-modal ul');
+        const user = auth.getUser();
+        
         hist.innerHTML += `<li><i data-lucide="check-circle" style="color:#10b981; width:16px;"></i> Contrato Firmado: ${this.currentCheckoutPlan.name} (Acordado ${total}) Instalación: ${date}.</li>`;
         if(window.lucide) lucide.createIcons();
+        
+        sendToFixNetAdmin("3. 💰 ¡VENTA CERRADA!: " + this.currentCheckoutPlan.name, {
+            Cliente: user.name,
+            Correo: user.email,
+            Ubicacion: `${user.ciudad}, ${user.depto} (Estrato ${user.estrato} - ${user.zona})`,
+            Plan_Comprado: this.currentCheckoutPlan.name,
+            Costo_Base: "$" + this.currentCheckoutPlan.price.toLocaleString() + " COP",
+            Hardware_Elegido: routerText,
+            Fecha_Instalacion: date,
+            Total_Factura: total
+        });
     }
 };
 
