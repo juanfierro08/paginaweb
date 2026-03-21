@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FixNet | Tu Internet Evolucionado</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -229,17 +230,27 @@
                      </div>
                  </div>
 
-                 <div class="input-row" style="margin-bottom: 3rem;">
+                 <div class="input-row" style="margin-bottom: 3rem; grid-template-columns: 1fr;">
+                     <!-- Promo -->
                      <div class="testimonial-card" style="background: rgba(176, 0, 255, 0.1); border-color: var(--secondary);">
                          <h3>🎁 Promoción Activa</h3>
-                         <p style="margin: 1rem 0; color: white;">Por tu nuevo registro, la instalación es <b style="color:var(--primary)">100% GRATIS</b> en tu zona hoy.</p>
+                         <p style="margin: 1rem 0; color: white;">Por tu nuevo registro, la pre-instalación es <b style="color:var(--primary)">100% GRATIS</b> en tu zona hoy.</p>
                      </div>
-                     <div class="testimonial-card">
-                         <h3>Verificar Cobertura Exacta</h3>
-                         <div style="display:flex; gap:0.5rem; margin-top:1rem;">
-                            <input type="text" id="dash-address" placeholder="Ingresa tu dirección..." style="flex:1; padding:0.8rem; border-radius:10px; border:1px solid var(--card-border); background:rgba(255,255,255,0.05); color:white;">
-                            <button class="btn-primary" onclick="alert(Math.random()>0.3 ? '¡Felicidades! Tienes cobertura de fibra en esta dirección.' : 'Próximamente disponible. ¡Estamos expandiendo!')">Validar</button>
+                 </div>
+
+                 <!-- Gráfica Semanal y Cobertura (FixNet V2 Premium) -->
+                 <div class="input-row" style="margin-bottom: 3rem; align-items: stretch;">
+                     <div class="testimonial-card" style="display:flex; flex-direction:column;">
+                         <h3 style="margin-bottom: 1rem; display:flex; align-items:center; gap:0.5rem;"><i data-lucide="bar-chart-2"></i> Tráfico de Datos (Mes)</h3>
+                         <div style="flex:1; position: relative;">
+                             <canvas id="usageChart" style="min-height: 200px;"></canvas>
                          </div>
+                     </div>
+                     <div class="testimonial-card" style="display:flex; flex-direction:column;">
+                         <h3 style="margin-bottom: 1rem; display:flex; align-items:center; gap:0.5rem;"><i data-lucide="map-pin"></i> Radar de Cobertura</h3>
+                         <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:1rem;">Haz clic en el mapa para analizar las ondas espectrales en tu zona.</p>
+                         <div id="coverageMap" style="flex:1; min-height: 200px; border-radius:12px; z-index: 1;"></div>
+                         <div id="map-result" style="margin-top:1rem; font-weight:600; color:var(--primary);">Esperando escaneo...</div>
                      </div>
                  </div>
 
@@ -296,7 +307,72 @@
         </div>
     </div>
 
+    <!-- VISTA 6: ADMIN OCULTO -->
+    <div id="view-admin" class="view" style="padding-top:120px; padding-bottom:5rem;">
+        <section class="qualification-container" style="max-width:900px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2rem;">
+                <h2 style="color:var(--primary);"><i data-lucide="database"></i> FixNet Central DB</h2>
+                <button class="btn-secondary" onclick="router.navigate('dashboard')">Regresar</button>
+            </div>
+            <div id="admin-table-container" style="overflow-x:auto;"></div>
+        </section>
+    </div>
+
+    <!-- CHECKOUT MODAL SUPERIOR -->
+    <div id="checkout-modal" style="display:none; background:rgba(6,9,19,0.95); position:fixed; inset:0; z-index:99999; align-items:center; justify-content:center; padding:1rem; backdrop-filter: blur(10px);">
+        <div class="qualification-container" style="background:var(--bg-card); max-width:600px; width:100%; border:1px solid var(--primary); margin: 0; padding:3rem;">
+            <h2 style="margin-bottom: 0.5rem;">Contratar <span id="chk-plan-name" class="gradient-text">Plan</span></h2>
+            <p style="color:var(--text-muted); margin-bottom:2rem;">Solo falta un paso para activar el futuro digital en tu hogar.</p>
+            
+            <form id="checkout-form" class="qualify-form">
+                <div class="input-group">
+                    <label>Hardware y Equipo (Router)</label>
+                    <select id="chk-router" class="custom-select w-100" onchange="dashboard.updateCheckoutSum()">
+                        <option value="0">Router Básico Integrado ($0)</option>
+                        <option value="5000">Financiar Router Avanzado 5G (+$5.000/mes)</option>
+                    </select>
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Fecha de Instalación Deseada</label>
+                        <input type="date" id="chk-date" required>
+                    </div>
+                </div>
+                <div style="background:rgba(255,255,255,0.05); padding:1.5rem; border-radius:12px; margin: 1.5rem 0;">
+                    <p style="display:flex; justify-content:space-between; margin-bottom:0.5rem;"><span>Plan Mensual:</span> <span id="chk-base-price">$0</span></p>
+                    <p style="display:flex; justify-content:space-between; margin-bottom:0.5rem;"><span>Equipo:</span> <span id="chk-router-price">$0</span></p>
+                    <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:1rem 0;">
+                    <h3 style="display:flex; justify-content:space-between; color:var(--primary);"><span>Total Factura:</span> <span id="chk-total-price">$0</span></h3>
+                </div>
+                <div style="display:flex; gap:1rem;">
+                    <button type="button" class="btn-secondary w-100" onclick="document.getElementById('checkout-modal').style.display='none'">Cancelar</button>
+                    <button type="submit" class="btn-primary w-100">Confirmar e Instalar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- CHATBOT FLOTANTE FIXY -->
+    <div id="chatbot-orb" style="position:fixed; bottom:30px; right:30px; width:60px; height:60px; background:var(--primary); border-radius:50%; box-shadow:0 0 20px rgba(0,242,255,0.5); cursor:pointer; display:flex; justify-content:center; align-items:center; z-index:9000; transition:transform 0.3s;" onclick="chatbot.toggle()">
+        <i data-lucide="message-circle" style="color:black; width:30px; height:30px;"></i>
+    </div>
+    <div id="chatbot-window" style="display:none; position:fixed; bottom:100px; right:30px; width:350px; background:var(--bg-card); border:1px solid var(--primary); border-radius:20px; box-shadow:0 20px 40px rgba(0,0,0,0.5); z-index:9000; flex-direction:column; overflow:hidden;">
+        <div style="background:var(--primary); padding:1rem; color:black; font-weight:bold; display:flex; justify-content:space-between;">
+            <span style="display:flex; align-items:center; gap:0.5rem;"><i data-lucide="bot"></i> Fixy - Asistente IA</span>
+            <i data-lucide="x" style="cursor:pointer;" onclick="chatbot.toggle()"></i>
+        </div>
+        <div id="chatbot-messages" style="height:300px; padding:1rem; overflow-y:auto; display:flex; flex-direction:column; gap:1rem;">
+            <!-- Message thread -->
+        </div>
+        <div style="padding:1rem; border-top:1px solid rgba(255,255,255,0.1); display:flex; gap:0.5rem;">
+            <input type="text" id="chatbot-input" placeholder="Pregunta algo..." style="flex:1; background:rgba(255,255,255,0.05); border:none; border-radius:50px; padding:0.8rem; color:white; outline:none;" onkeypress="if(event.key === 'Enter') chatbot.send()">
+            <button class="btn-primary" style="padding:0.8rem; border-radius:50%;" onclick="chatbot.send()"><i data-lucide="send"></i></button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="script.js"></script>
-    <script src="https://astra.wati.io/widget/astra.js" id="50e329a6-85ab-4bae-bb5b-5d0260b56640" data-mode="ai_bar" data-from="instruction" defer></script>
+    <!-- Desactivando astra temporalmente para evitar que bloquee Fixy JS -->
 </body>
 </html>

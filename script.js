@@ -6,6 +6,9 @@ const router = {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.getElementById('view-' + viewId).classList.add('active');
         
+        // Admin easter egg count bypass if going to admin
+        if(viewId === 'admin') admin.init();
+        
         // Hide standard nav if in auth
         if(viewId === 'auth' || viewId === 'onboarding') {
             document.getElementById('nav-public').style.display = 'none';
@@ -121,8 +124,82 @@ const auth = {
     }
 };
 
+// --- PREMIUM VISUALS (Chart & Leaflet) ---
+let isMapInit = false;
+const visuals = {
+    renderChart: function() {
+        const ctx = document.getElementById('usageChart');
+        if(!ctx) return;
+        if(window.fixnetChart) window.fixnetChart.destroy();
+        
+        const labels = ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'];
+        const data = [Math.floor(Math.random()*250)+50, Math.floor(Math.random()*400)+100, Math.floor(Math.random()*500)+150, Math.floor(Math.random()*300)+50];
+        
+        window.fixnetChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Descargas (GB)',
+                    data: data,
+                    borderColor: '#00f2ff',
+                    backgroundColor: 'rgba(0, 242, 255, 0.2)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#b000ff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { 
+                    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9ca3af' } },
+                    x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9ca3af' } }
+                }
+            }
+        });
+    },
+    renderMap: function(user) {
+        if(isMapInit) return;
+        isMapInit = true;
+        
+        let lat = 4.6097, lng = -74.0817; 
+        if(user.ciudad && user.ciudad.toLowerCase().includes('medellin')) { lat = 6.2442; lng = -75.5812; }
+        
+        const map = L.map('coverageMap').setView([lat, lng], 13);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; CARTO'
+        }).addTo(map);
+
+        setTimeout(() => map.invalidateSize(), 500);
+
+        let currentMarker = null;
+        map.on('click', function(e) {
+            if(currentMarker) map.removeLayer(currentMarker);
+            currentMarker = L.marker(e.latlng).addTo(map);
+            
+            const res = document.getElementById('map-result');
+            res.innerHTML = '<span style="color:var(--text-muted)">Escaneando espectro en coordenadas...</span>';
+            setTimeout(() => {
+                if(user.zona === 'rural') {
+                    res.innerHTML = '<i data-lucide="radio" style="width:18px;"></i> Factibilidad: Red Microondas/Satelital Activa.';
+                    res.style.color = '#10b981';
+                } else {
+                    res.innerHTML = Math.random() > 0.25 ? '<i data-lucide="zap" style="width:18px;"></i> Factibilidad: Fibra Óptica FTTH 100%.' : '<i data-lucide="alert-circle" style="width:18px;"></i> Zona con puertos limitados de red.';
+                    res.style.color = res.innerHTML.includes('limitados') ? '#fbbf24' : 'var(--primary)';
+                }
+                if(window.lucide) lucide.createIcons();
+            }, 1200);
+        });
+    }
+};
+
 // --- DASHBOARD LOGIC ---
 const dashboard = {
+    currentCheckoutPlan: null,
+
     init: function() {
         const user = auth.getUser();
         if(!user) return router.navigate('auth');
@@ -130,7 +207,6 @@ const dashboard = {
         document.getElementById('dash-name').innerText = user.name.split(' ')[0];
         document.getElementById('dash-location').innerHTML = `<b>Ubicación:</b> ${user.ciudad}, ${user.depto} (Estrato ${user.estrato})`;
         
-        // Random Status logic
         const statusEl = document.getElementById('dash-status');
         if(Math.random() > 0.8) {
             statusEl.className = 'status-badge error-status';
@@ -141,6 +217,12 @@ const dashboard = {
         }
         
         this.renderPlans(user);
+        
+        // Initializing Map and Chart after a tiny delay so DOM is available
+        setTimeout(() => {
+            visuals.renderChart();
+            visuals.renderMap(user);
+        }, 300);
     },
     
     renderPlans: function(user) {
@@ -172,7 +254,7 @@ const dashboard = {
                         <li><i data-lucide="check-circle-2"></i> ${p.speed}</li>
                         ${p.premium ? '<li><i data-lucide="check-circle-2"></i> Soporte VIP Exclusivo</li>' : ''}
                     </ul>
-                    <button class="btn-primary w-100" onclick="alert('Simulación: Solicitud de contratación de ${p.name} enviada al sistema.')" style="margin-top: 1.5rem;">Adquirir Plan</button>
+                    <button class="btn-primary w-100" onclick="dashboard.openCheckout('${p.name}', ${p.price})" style="margin-top: 1.5rem;">Adquirir Plan</button>
                 </div>
             `;
         }
@@ -213,6 +295,36 @@ const dashboard = {
         }
 
         document.getElementById('dash-plans').innerHTML = html;
+        if(window.lucide) lucide.createIcons();
+    },
+
+    openCheckout: function(name, price) {
+        this.currentCheckoutPlan = { name, price };
+        document.getElementById('chk-plan-name').innerText = name;
+        this.updateCheckoutSum();
+        document.getElementById('checkout-modal').style.display='flex';
+    },
+
+    updateCheckoutSum: function() {
+        if(!this.currentCheckoutPlan) return;
+        const routerVal = parseInt(document.getElementById('chk-router').value);
+        const base = this.currentCheckoutPlan.price;
+        const total = base + routerVal;
+        
+        document.getElementById('chk-base-price').innerText = "$" + base.toLocaleString() + " COP";
+        document.getElementById('chk-router-price').innerText = "$" + routerVal.toLocaleString() + " COP";
+        document.getElementById('chk-total-price').innerText = "$" + total.toLocaleString() + " COP";
+    },
+
+    processCheckout: function(e) {
+        e.preventDefault();
+        const date = document.getElementById('chk-date').value;
+        const total = document.getElementById('chk-total-price').innerText;
+        alert(`¡Felicidades! Se ha tramitado el contrato de: ${this.currentCheckoutPlan.name}. El técnico asignado te visitará el día ${date}. Tarifa mensual acordada: ${total}.`);
+        document.getElementById('checkout-modal').style.display = 'none';
+        
+        const hist = document.querySelector('#historial-modal ul');
+        hist.innerHTML += `<li><i data-lucide="check-circle" style="color:#10b981; width:16px;"></i> Contrato Firmado: ${this.currentCheckoutPlan.name} (Acordado ${total}) Instalación: ${date}.</li>`;
         if(window.lucide) lucide.createIcons();
     }
 };
@@ -262,6 +374,84 @@ document.querySelectorAll('.faq-question').forEach(button => {
 document.getElementById('login-form').addEventListener('submit', auth.login);
 document.getElementById('register-form').addEventListener('submit', auth.register);
 document.getElementById('onboarding-form').addEventListener('submit', e => auth.saveOnboarding(e));
+document.getElementById('checkout-form').addEventListener('submit', e => dashboard.processCheckout(e));
+
+// --- ADMIN SECRETS (MODO DIOS) ---
+let clicksOnLogo = 0;
+document.querySelectorAll('.logo').forEach(logo => {
+    logo.addEventListener('click', () => {
+        clicksOnLogo++;
+        if(clicksOnLogo >= 5) {
+            clicksOnLogo = 0;
+            const pass = prompt("Acceso Restringido. Clave de administrador (Hint: 1234):");
+            if(pass === "1234") router.navigate('admin');
+            else alert("Acceso Denegado.");
+        }
+    });
+});
+const admin = {
+    init: function() {
+        const users = JSON.parse(localStorage.getItem('fixnet_db') || '[]');
+        let html = `<table style="width:100%; text-align:left; border-collapse: collapse; background:var(--bg-card);"><tr style="border-bottom: 2px solid var(--primary);"><th style="padding:1rem;">Nombre</th><th>Correo</th><th>Ubicación</th><th>Estrato</th></tr>`;
+        users.forEach(u => {
+            html += `<tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color:var(--text-muted);"><td style="padding:1rem;">${u.name}</td><td>${u.email}</td><td>${u.ciudad || 'No Def'} (${u.zona || '?'})</td><td>${u.estrato || 'N/A'}</td></tr>`;
+        });
+        html += `</table>`;
+        document.getElementById('admin-table-container').innerHTML = html;
+    }
+};
+
+// --- CHATBOT FIXY ---
+const chatbot = {
+    isOpen: false,
+    toggle: function() {
+        this.isOpen = !this.isOpen;
+        document.getElementById('chatbot-window').style.display = this.isOpen ? 'flex' : 'none';
+        if(this.isOpen && document.getElementById('chatbot-messages').children.length === 0) {
+            this.addMessage("bot", "¡Hola! Soy Fixy, tu asistente de Inteligencia Artificial para redes. ¿En qué te ayudo hoy?");
+        }
+    },
+    send: function() {
+        const input = document.getElementById('chatbot-input');
+        const text = input.value.trim();
+        if(!text) return;
+        this.addMessage("user", text);
+        input.value = "";
+        
+        setTimeout(() => {
+            const lower = text.toLowerCase();
+            let res = "De acuerdo. Nuestros asesores humanos recibirán esto y te contactarán vía celular en unos 15 minutos.";
+            if(lower.includes("lento") || lower.includes("cae") || lower.includes("falla")) {
+                res = "Puedo mandar una actualización masiva de espectro a tu antena. ¡Reinicia tu equipo en 10 minutos!";
+            } else if (lower.includes("precio") || lower.includes("plan")) {
+                res = "Tus precios están atados a tu estrato para garantizar la tarifa solidaria. Puedes revisar tu Dashboard para más info.";
+            } else if (lower.includes("pagar") || lower.includes("factura")) {
+                res = "En FixNet simplificamos tu pago. Usa el botón AvalPay guardado en tu Panel para pago instantáneo.";
+            }
+            this.addMessage("bot", res);
+        }, 1000);
+    },
+    addMessage: function(sender, text) {
+        const box = document.getElementById('chatbot-messages');
+        const msgDiv = document.createElement('div');
+        msgDiv.style.maxWidth = '80%';
+        msgDiv.style.padding = '10px 15px';
+        msgDiv.style.borderRadius = '15px';
+        msgDiv.style.marginBottom = '5px';
+        msgDiv.innerText = text;
+        if(sender === 'user') {
+            msgDiv.style.backgroundColor = 'var(--primary)';
+            msgDiv.style.color = 'black';
+            msgDiv.style.alignSelf = 'flex-end';
+        } else {
+            msgDiv.style.backgroundColor = 'rgba(255,255,255,0.1)';
+            msgDiv.style.color = 'white';
+            msgDiv.style.alignSelf = 'flex-start';
+        }
+        box.appendChild(msgDiv);
+        box.scrollTop = box.scrollHeight;
+    }
+};
 
 // INITIALIZE
 window.onload = () => {
