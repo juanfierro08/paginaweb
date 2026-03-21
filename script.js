@@ -15,15 +15,12 @@ const router = {
         if(viewId === 'admin') admin.init();
         
         // Manejo Inteligente de Navbars
-        if(viewId === 'auth' || viewId === 'onboarding') {
-            document.getElementById('nav-public').style.display = 'none';
-            document.getElementById('nav-private').style.display = 'none';
-        } else if(auth.isLoggedIn()) {
+        if(auth.isLoggedIn()) {
             // Si el cliente creó su cuenta y está logueado, SIEMPRE verá su barra superior privada y opciones extras
             document.getElementById('nav-public').style.display = 'none';
             document.getElementById('nav-private').style.display = 'flex';
         } else {
-            // Visitante común
+            // Visitante común (incluido en las pantallas de Auth y Onboarding)
             document.getElementById('nav-public').style.display = 'flex';
             document.getElementById('nav-private').style.display = 'none';
         }
@@ -286,7 +283,7 @@ const dashboard = {
                         <li><i data-lucide="check-circle-2"></i> ${p.speed}</li>
                         ${p.premium ? '<li><i data-lucide="check-circle-2"></i> Soporte VIP Exclusivo</li>' : ''}
                     </ul>
-                    <button class="btn-primary w-100" onclick="dashboard.openCheckout('${p.name}', ${p.price})" style="margin-top: 1.5rem;">Adquirir Plan</button>
+                    <button class="btn-primary w-100" onclick="dashboard.openCheckout('${p.name}', ${p.price})" style="margin-top: auto;">Adquirir Plan</button>
                 </div>
             `;
         }
