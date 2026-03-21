@@ -36,13 +36,14 @@
 
     <!-- Navbar Privada (Oculta al inicio) -->
     <nav class="navbar hidden" id="nav-private" style="display: none;">
-        <div class="logo">
+        <div class="logo" style="cursor: pointer;" onclick="router.navigate('dashboard')">
             <i data-lucide="zap"></i>
             <span>FixNet</span>
         </div>
         <ul class="nav-links">
+            <li><a href="#" onclick="router.navigate('landing')">Página de Inicio</a></li>
             <li><a href="#" onclick="router.navigate('dashboard')">Mi Panel</a></li>
-            <li><a href="#" onclick="router.navigate('support')">Soporte y Ayuda</a></li>
+            <li><a href="#" onclick="router.navigate('support')">Soporte Fixy</a></li>
             <li><a href="#" class="btn-secondary" onclick="auth.logout()">Cerrar Sesión</a></li>
         </ul>
         <div class="hamburger"><i data-lucide="menu"></i></div>

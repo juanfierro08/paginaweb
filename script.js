@@ -3,31 +3,35 @@
 // --- ROUTER ---
 const router = {
     navigate: function(viewId) {
+        // Redirigir de inmediato al Panel si intenta entrar al login ya estando registrado
+        if(viewId === 'auth' && auth.isLoggedIn()) {
+            return this.navigate('dashboard');
+        }
+
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.getElementById('view-' + viewId).classList.add('active');
         
-        // Admin easter egg count bypass if going to admin
+        // Admin easter egg
         if(viewId === 'admin') admin.init();
         
-        // Hide standard nav if in auth
+        // Manejo Inteligente de Navbars
         if(viewId === 'auth' || viewId === 'onboarding') {
             document.getElementById('nav-public').style.display = 'none';
             document.getElementById('nav-private').style.display = 'none';
-        } else if(auth.isLoggedIn() && viewId !== 'landing') {
+        } else if(auth.isLoggedIn()) {
+            // Si el cliente creó su cuenta y está logueado, SIEMPRE verá su barra superior privada y opciones extras
             document.getElementById('nav-public').style.display = 'none';
             document.getElementById('nav-private').style.display = 'flex';
         } else {
+            // Visitante común
             document.getElementById('nav-public').style.display = 'flex';
             document.getElementById('nav-private').style.display = 'none';
         }
 
-        window.scrollTo(0, 0);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         
         // Trigger view-specific logic
         if(viewId === 'dashboard') dashboard.init();
-        if(viewId === 'landing') {
-            // Optional redirect check here
-        }
         if(window.lucide) lucide.createIcons();
     }
 };
