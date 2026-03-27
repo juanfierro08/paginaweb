@@ -1,8 +1,23 @@
 // FixNet + ConectaYa Unified SPA Logic
 
+// --- NAVIGATION & MOBILE MENU ---
+const nav = {
+    toggleMobileMenu: function() {
+        const publicNav = document.getElementById('nav-public');
+        const privateNav = document.getElementById('nav-private');
+        const activeNav = publicNav.style.display !== 'none' ? publicNav : privateNav;
+        activeNav.classList.toggle('mobile-active');
+    },
+    closeMobileMenu: function() {
+        document.getElementById('nav-public').classList.remove('mobile-active');
+        document.getElementById('nav-private').classList.remove('mobile-active');
+    }
+};
+
 // --- ROUTER ---
 const router = {
     navigate: function(viewId) {
+        nav.closeMobileMenu();
         // Redirigir de inmediato al Panel si intenta entrar al login ya estando registrado o hace onboarding
         if (viewId === 'auth' && auth.isLoggedIn()) {
             const user = auth.getUser();
