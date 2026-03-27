@@ -23,14 +23,16 @@
             </div>
             ConectaYa
         </a>
-        <ul class="nav-links">
-            <li><a onclick="router.navigate('landing')">Inicio</a></li>
-            <li><a onclick="router.navigate('plans')">Planes y Cobertura</a></li>
-            <li><a onclick="router.navigate('support')">Diagnóstico</a></li>
-        </ul>
-        <div class="nav-cta">
-            <a class="btn btn-outline" onclick="router.navigate('auth')">Iniciar sesión</a>
-            <a class="btn btn-primary" onclick="router.navigate('plans')">Contratar</a>
+        <div class="nav-menu-wrapper">
+            <ul class="nav-links">
+                <li><a onclick="router.navigate('landing')">Inicio</a></li>
+                <li><a onclick="router.navigate('plans')">Planes y Cobertura</a></li>
+                <li><a onclick="router.navigate('support')">Diagnóstico</a></li>
+            </ul>
+            <div class="nav-cta">
+                <a class="btn btn-outline" onclick="router.navigate('auth')">Iniciar sesión</a>
+                <a class="btn btn-primary" onclick="router.navigate('plans')">Contratar</a>
+            </div>
         </div>
         <button class="menu-toggle" id="public-menu-toggle" onclick="nav.toggleMobileMenu()">
             <i data-lucide="menu"></i>
@@ -45,13 +47,15 @@
             </div>
             ConectaYa
         </a>
-        <ul class="nav-links">
-            <li><a onclick="router.navigate('landing')">Página de Inicio</a></li>
-            <li><a onclick="router.navigate('dashboard')">Mi Panel</a></li>
-            <li><a onclick="router.navigate('support')">Soporte Técnico</a></li>
-        </ul>
-        <div class="nav-cta">
-            <a class="btn btn-outline" style="border-color: var(--danger); color: var(--danger)" onclick="auth.logout()">Cerrar Sesión</a>
+        <div class="nav-menu-wrapper">
+            <ul class="nav-links">
+                <li><a onclick="router.navigate('landing')">Página de Inicio</a></li>
+                <li><a onclick="router.navigate('dashboard')">Mi Panel</a></li>
+                <li><a onclick="router.navigate('support')">Soporte Técnico</a></li>
+            </ul>
+            <div class="nav-cta">
+                <a class="btn btn-outline" style="border-color: var(--danger); color: var(--danger)" onclick="auth.logout()">Cerrar Sesión</a>
+            </div>
         </div>
         <button class="menu-toggle" id="private-menu-toggle" onclick="nav.toggleMobileMenu()">
             <i data-lucide="menu"></i>
