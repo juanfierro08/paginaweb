@@ -3,110 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FixNet | Tu Internet Evolucionado</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <title>ConectaYa | Tu Internet Evolucionado</title>
+    <!-- Fonts from ConectaYa -->
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Leaflet Map CSS for FixNet logic -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <!-- Unified CSS -->
     <link rel="stylesheet" href="styles.css">
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        .view { display: none; padding-top: 80px; min-height: 100vh; animation: fadeIn 0.4s ease; }
-        .view.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .view-landing.active { display: flex; flex-direction: column; }
-        .hidden { display: none !important; }
-        .status-badge { padding: 0.5rem 1.2rem; border-radius: 50px; font-size: 0.9rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem; }
-        .status-badge.normal-status { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4); }
-        .status-badge.error-status { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.4); }
-    </style>
 </head>
 <body>
-    <!-- Navbar Pública -->
-    <nav class="navbar" id="nav-public">
-        <div class="logo">
-            <i data-lucide="zap"></i>
-            <span>FixNet</span>
-        </div>
+
+    <!-- NAVBAR PÚBLICA (CONECTAYA) -->
+    <nav id="nav-public">
+        <a class="nav-logo" onclick="router.navigate('landing')">
+            <div class="nav-logo-icon">
+                <i data-lucide="zap" width="18" height="18" stroke-width="2.5"></i>
+            </div>
+            ConectaYa
+        </a>
         <ul class="nav-links">
-            <li><a href="#" onclick="router.navigate('landing')">Inicio</a></li>
-            <li><a href="#about" onclick="router.navigate('landing')">Ventajas</a></li>
-            <li><a href="#" class="btn-primary" onclick="router.navigate('auth')">Mi Portal FixNet</a></li>
+            <li><a onclick="router.navigate('landing')">Inicio</a></li>
+            <li><a onclick="router.navigate('plans')">Planes y Cobertura</a></li>
+            <li><a onclick="router.navigate('support')">Diagnóstico</a></li>
         </ul>
-        <div class="hamburger"><i data-lucide="menu"></i></div>
+        <div class="nav-cta">
+            <a class="btn btn-outline" onclick="router.navigate('auth')">Iniciar sesión</a>
+            <a class="btn btn-primary" onclick="router.navigate('plans')">Contratar</a>
+        </div>
     </nav>
 
-    <!-- Navbar Privada (Oculta al inicio) -->
-    <nav class="navbar" id="nav-private" style="display: none;">
-        <div class="logo" style="cursor: pointer;" onclick="router.navigate('dashboard')">
-            <i data-lucide="zap"></i>
-            <span>FixNet</span>
-        </div>
+    <!-- NAVBAR PRIVADA (ESTILO CONECTAYA) -->
+    <nav id="nav-private" style="display: none;">
+        <a class="nav-logo" onclick="router.navigate('dashboard')">
+            <div class="nav-logo-icon">
+                <i data-lucide="zap" width="18" height="18" stroke-width="2.5"></i>
+            </div>
+            ConectaYa
+        </a>
         <ul class="nav-links">
-            <li><a href="#" onclick="router.navigate('landing')">Página de Inicio</a></li>
-            <li><a href="#" onclick="router.navigate('dashboard')">Mi Panel</a></li>
-            <li><a href="#" onclick="router.navigate('support')">Soporte Fixy</a></li>
-            <li><a href="#" class="btn-secondary" onclick="auth.logout()">Cerrar Sesión</a></li>
+            <li><a onclick="router.navigate('landing')">Página de Inicio</a></li>
+            <li><a onclick="router.navigate('dashboard')">Mi Panel</a></li>
+            <li><a onclick="router.navigate('support')">Soporte Técnico</a></li>
         </ul>
-        <div class="hamburger"><i data-lucide="menu"></i></div>
+        <div class="nav-cta">
+            <a class="btn btn-outline" style="border-color: var(--danger); color: var(--danger)" onclick="auth.logout()">Cerrar Sesión</a>
+        </div>
     </nav>
 
     <div id="app">
-        <!-- VISTA 1: LANDING PÚBLICA -->
-        <div id="view-landing" class="view active view-landing">
-            <header class="hero" id="home">
+
+        <!-- VISTA 1: LANDING -->
+        <div id="view-landing" class="view active">
+            <!-- HERO CONECTAYA -->
+            <section class="hero">
                 <div class="hero-content">
-                    <h1 class="animate-up">Conecta tu mundo a la <span class="gradient-text">Máxima Velocidad con FixNet</span></h1>
-                    <p class="animate-up delay-1">El primer proveedor de internet inteligente en Colombia. Planes adaptados a tu estrato y zona.</p>
-                    <div class="hero-buttons animate-up delay-2">
-                        <a href="#" onclick="router.navigate('auth')" class="btn-primary">Ver mis planes</a>
+                    <div class="hero-chip">
+                        <div class="hero-chip-dot"></div>
+                        Conectividad Inteligente para Colombia
+                    </div>
+                    <h1>Conecta tu hogar,<br><span>sin importar</span><br>dónde estés</h1>
+                    <p class="hero-desc">Internet inteligente, 100% Fibra Óptica para zonas urbanas e Internet dedicado para zonas rurales. Transparente, sin cláusulas, con toda la velocidad que necesitas.</p>
+                    <div class="hero-actions">
+                        <a onclick="router.navigate('plans')" class="btn btn-primary btn-lg">Ver planes de fibra</a>
+                        <a onclick="router.navigate('support')" class="btn btn-outline btn-lg">Diagnóstico técnico</a>
                     </div>
                 </div>
-                <div class="hero-visual animate-fade-in">
-                    <div class="glow-orb orb-1"></div>
-                    <div class="glow-orb orb-2"></div>
-                    <div class="glass-card main-card">
-                        <div class="speed-indicator"><span class="speed-number">1000</span><span class="speed-unit">Mbps</span></div>
-                        <p>Fibra Óptica Pura</p>
-                        <div class="ping-status"><i data-lucide="activity"></i> Ping 2ms</div>
+                <div class="hero-map">
+                    <div class="hero-map-img">
+                        <!-- Simulated Hero map -->
+                        <div style="font-size: 64px;">🌐</div>
+                        <div style="text-align: center; color: var(--neutral-600); font-weight: 500;">Conectando más de 850<br>municipios en el país.</div>
                     </div>
-                </div>
-            </header>
-            
-            <section id="testimonials" class="testimonials-section">
-                <div class="section-header">
-                    <h2>Lo que dicen nuestros <span class="gradient-text">Clientes</span></h2>
-                </div>
-                <div class="testimonials-grid">
-                    <div class="testimonial-card">
-                        <div class="stars"><i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i></div>
-                        <p>"La velocidad es increíble. Por fin puedo hacer stream y descargar juegos pesados al mismo tiempo sin lag. ¡Recomendadísimo el plan Ultra!"</p>
-                        <div class="client-info">
-                            <div class="client-avatar">1</div>
-                            <div><h4>Carlos Ramírez</h4><span>Gamer Profesional</span></div>
-                        </div>
-                    </div>
-                    <div class="testimonial-card">
-                        <div class="stars"><i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i></div>
-                        <p>"Pasé de lidiar con cortes diarios a tener teletrabajo sin interrupciones. La instalación fue muy rápida, el mismo día que lo contraté."</p>
-                        <div class="client-info">
-                            <div class="client-avatar" style="background: var(--primary);">2</div>
-                            <div><h4>María Fernanda</h4><span>Diseñadora Freelance</span></div>
-                        </div>
+                    <div class="map-badge">
+                        <div class="map-badge-val">850+</div>
+                        <div class="map-badge-lbl">Municipios cubiertos</div>
                     </div>
                 </div>
             </section>
 
-            <section id="faq" class="faq-section">
+            <div class="divider"></div>
+
+            <!-- SERVICIOS -->
+            <section>
                 <div class="section-header">
-                    <h2>Preguntas <span class="gradient-text">Frecuentes</span></h2>
+                    <div class="section-tag">Nuestros servicios</div>
+                    <h2>Todo lo que necesitas<br>para estar conectado</h2>
+                    <p class="section-sub">Soluciones avanzadas tanto residenciales como corporativas.</p>
                 </div>
-                <div class="faq-container">
-                    <div class="faq-item">
-                        <button class="faq-question"><span>¿Tienen cláusula de permanencia?</span><i data-lucide="chevron-down"></i></button>
-                        <div class="faq-answer"><p>No, en FixNet no atamos a nuestros clientes. Confiamos en la calidad de nuestro servicio.</p></div>
+                <div class="services-grid">
+                    <div class="service-card">
+                        <div class="service-icon" style="background:#ECFDF3; color:var(--success);"><i data-lucide="satellite"></i></div>
+                        <h3>Conectividad Rural Avanzada</h3>
+                        <p>Soluciones de microondas y red privada para el campo.</p>
+                        <div class="service-tag">Zonas Rurales</div>
                     </div>
-                    <div class="faq-item">
-                        <button class="faq-question"><span>¿La velocidad es 100% fibra óptica?</span><i data-lucide="chevron-down"></i></button>
-                        <div class="faq-answer"><p>Sí, la fibra entra directo a tu módem, asegurando que no haya interferencias y garantizando velocidad simétrica real.</p></div>
+                    <div class="service-card">
+                        <div class="service-icon"><i data-lucide="zap"></i></div>
+                        <h3>Fibra Óptica Urbana</h3>
+                        <p>Internet simétrico 100% dedicado directo hasta tu casa.</p>
+                        <div class="service-tag">Casco Urbano</div>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-icon" style="background:#FFFAEB; color:var(--warn);"><i data-lucide="activity"></i></div>
+                        <h3>Diagnóstico Automático IA</h3>
+                        <p>Mantenemos tu red limpia 24/7 de interrupciones.</p>
+                        <div class="service-tag">Gratuito</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- STATS -->
+            <div class="stats-section">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-num">850<span>+</span></div>
+                        <div class="stat-lbl">Municipios cubiertos</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-num">150<span>K</span></div>
+                        <div class="stat-lbl">Hogares conectados</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-num">98<span>%</span></div>
+                        <div class="stat-lbl">Satisfacción del cliente</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-num">&lt;2<span>ms</span></div>
+                        <div class="stat-lbl">Ping promedio en Fibra</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TESTIMONIOS -->
+            <section>
+                <div class="section-header">
+                    <div class="section-tag">Testimonios</div>
+                    <h2>Lo que dicen nuestros usuarios</h2>
+                </div>
+                <div class="testimonials-grid">
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars">★★★★★</div>
+                        <p class="testimonial-text">"La velocidad es increíble. Por fin puedo hacer stream y descargar juegos pesados al mismo tiempo sin lag."</p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar"><i data-lucide="user" width="14"></i></div>
+                            <div>
+                                <div class="author-name">Carlos Ramírez</div>
+                                <div class="author-zone">Gamer Profesional</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars">★★★★★</div>
+                        <p class="testimonial-text">"Pasé de lidiar con cortes diarios a tener teletrabajo sin interrupciones. La instalación fue muy rápida."</p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar" style="background:#ECFDF3;color:var(--success)"><i data-lucide="user" width="14"></i></div>
+                            <div>
+                                <div class="author-name">María Fernanda</div>
+                                <div class="author-zone">Diseñadora Freelance</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -114,76 +171,84 @@
 
         <!-- VISTA 2: AUTHENTICATION -->
         <div id="view-auth" class="view">
-            <section class="auth-wrapper services-section" style="min-height: calc(100vh - 80px); display:flex; flex-direction:column; justify-content:center; align-items:center;">
-                <div class="qualification-container" style="margin: 0; width: 100%; max-width: 450px;">
-                    <div class="section-header" style="margin-bottom: 2rem;">
-                        <h2 id="auth-title">Inicia <span class="gradient-text">Sesión</span></h2>
-                        <p id="auth-subtitle">Accede a tu portal FixNet</p>
+            <div class="auth-wrapper">
+                <div class="auth-card">
+                    <div style="text-align: center; margin-bottom: 32px;">
+                        <div class="nav-logo-icon" style="margin: 0 auto 16px;">
+                            <i data-lucide="zap" width="20" height="20" stroke-width="2.5"></i>
+                        </div>
+                        <h2 id="auth-title">Inicia Sesión</h2>
+                        <p id="auth-subtitle" style="color: var(--neutral-600); font-size: 15px; margin-top: 4px;">Accede a tu portal FixNet / ConectaYa</p>
                     </div>
-                    
-                    <form id="login-form" class="qualify-form">
-                        <div class="input-group">
+
+                    <form id="login-form">
+                        <div class="form-group">
                             <label>Correo Electrónico</label>
-                            <input type="email" id="login-email" required placeholder="tucorreo@ejemplo.com">
+                            <input type="email" id="login-email" class="form-control" required placeholder="tucorreo@ejemplo.com">
                         </div>
-                        <div class="input-group">
+                        <div class="form-group">
                             <label>Contraseña</label>
-                            <input type="password" id="login-password" required placeholder="••••••••">
+                            <input type="password" id="login-password" class="form-control" required placeholder="••••••••">
                         </div>
-                        <button type="submit" class="btn-primary w-100 mt-2">Ingresar a FixNet</button>
-                        <p style="text-align: center; margin-top: 1rem; color: var(--text-muted); cursor: pointer;" onclick="auth.toggleMode()">¿No tienes cuenta? <span style="color: var(--primary);">Regístrate aquí</span></p>
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mt-2">Ingresar al Portal</button>
+                        <p style="text-align: center; margin-top: 24px; font-size: 14px; color: var(--neutral-600);">
+                            ¿No tienes cuenta? <a style="color: var(--brand); cursor: pointer; font-weight: 500;" onclick="auth.toggleMode()">Regístrate aquí</a>
+                        </p>
                     </form>
 
-                    <form id="register-form" class="qualify-form" style="display: none;">
-                        <div class="input-group">
+                    <form id="register-form" style="display: none;">
+                        <div class="form-group">
                             <label>Nombre Completo</label>
-                            <input type="text" id="reg-name" required placeholder="Ej. Juan Pérez">
+                            <input type="text" id="reg-name" class="form-control" required placeholder="Ej. Juan Pérez">
                         </div>
-                        <div class="input-group">
+                        <div class="form-group">
                             <label>Correo Electrónico</label>
-                            <input type="email" id="reg-email" required placeholder="tucorreo@ejemplo.com">
+                            <input type="email" id="reg-email" class="form-control" required placeholder="tucorreo@ejemplo.com">
                         </div>
-                        <div class="input-group">
+                        <div class="form-group">
                             <label>Contraseña</label>
-                            <input type="password" id="reg-password" required placeholder="Crea una contraseña segura">
+                            <input type="password" id="reg-password" class="form-control" required placeholder="Crea una contraseña segura">
                         </div>
-                        <button type="submit" class="btn-primary w-100 mt-2">Crear mi cuenta</button>
-                        <p style="text-align: center; margin-top: 1rem; color: var(--text-muted); cursor: pointer;" onclick="auth.toggleMode()">¿Ya eres cliente? <span style="color: var(--primary);">Inicia Sesión</span></p>
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mt-2">Crear mi cuenta</button>
+                        <p style="text-align: center; margin-top: 24px; font-size: 14px; color: var(--neutral-600);">
+                            ¿Ya eres cliente? <a style="color: var(--brand); cursor: pointer; font-weight: 500;" onclick="auth.toggleMode()">Inicia Sesión</a>
+                        </p>
                     </form>
                 </div>
-            </section>
+            </div>
         </div>
 
         <!-- VISTA 3: ONBOARDING -->
         <div id="view-onboarding" class="view">
-             <section class="services-section">
-                <div class="section-header">
-                    <h2>Configura tu <span class="gradient-text">Perfil FixNet</span></h2>
-                    <p>Para ofrecerte los precios correctos y verificar tu cobertura, necesitamos saber dónde resides.</p>
-                </div>
-                <div class="qualification-container">
-                    <form id="onboarding-form" class="qualify-form">
-                        <div class="input-row">
-                            <div class="input-group">
+            <div class="auth-wrapper" style="align-items: flex-start; padding-top: 60px;">
+                <div class="auth-card" style="max-width: 600px;">
+                    <div style="margin-bottom: 32px;">
+                        <h2>Configura tu perfil</h2>
+                        <p style="color: var(--neutral-600); font-size: 15px; margin-top: 4px;">Para ofrecerte los planes correctos, validar factibilidad y confirmar nuestras tarifas solidarias subsidiadas.</p>
+                    </div>
+
+                    <form id="onboarding-form">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div class="form-group">
                                 <label>Departamento</label>
-                                <input type="text" id="ob-depto" required placeholder="Ej. Antioquia">
+                                <input type="text" id="ob-depto" class="form-control" required placeholder="Ej. Antioquia">
                             </div>
-                            <div class="input-group">
+                            <div class="form-group">
                                 <label>Ciudad / Municipio</label>
-                                <input type="text" id="ob-ciudad" required placeholder="Ej. Medellín">
+                                <input type="text" id="ob-ciudad" class="form-control" required placeholder="Ej. Medellín">
                             </div>
                         </div>
-                        <div class="input-row">
-                            <div class="input-group">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div class="form-group">
                                 <label>Tipo de Zona</label>
-                                <select id="ob-zona" required class="custom-select w-100">
-                                    <option value="ciudad">Ciudad (Urbano)</option>
-                                    <option value="rural">Campo (Rural / Vereda)</option>
+                                <select id="ob-zona" class="form-control" required>
+                                    <option value="ciudad">Casco Urbano (Ciudad/Barrio)</option>
+                                    <option value="rural">Rural (Vereda/Campo)</option>
                                 </select>
                             </div>
-                            <div class="input-group">
+                            <div class="form-group">
                                 <label>Estrato Socioeconómico</label>
-                                <select id="ob-estrato" required class="custom-select w-100">
+                                <select id="ob-estrato" class="form-control" required>
                                     <option value="1">Estrato 1</option>
                                     <option value="2">Estrato 2</option>
                                     <option value="3">Estrato 3</option>
@@ -193,187 +258,273 @@
                                 </select>
                             </div>
                         </div>
-                        <button type="submit" class="btn-primary w-100 mt-2">Finalizar y Ver Planes</button>
+                        <button type="submit" class="btn btn-primary btn-lg w-100" style="margin-top: 16px;">Finalizar y Ver Planes</button>
                     </form>
                 </div>
-             </section>
+            </div>
         </div>
 
-        <!-- VISTA 4: DASHBOARD -->
-        <div id="view-dashboard" class="view">
-             <section class="services-section">
-                 <div class="section-header" style="text-align: left; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 2rem; gap: 1rem;">
-                     <div>
-                         <h2 style="font-size: 2rem;">Hola, <span id="dash-name" class="gradient-text">Usuario</span> 👋</h2>
-                         <p id="dash-location" style="color: var(--text-muted);">Ubicación: Cargando...</p>
-                     </div>
-                     <div class="status-badge normal-status" id="dash-status">
-                         <i data-lucide="check-circle-2"></i> Servicio Normal en tu zona
-                     </div>
-                 </div>
-
-                 <!-- Info Adicional y Historial Simulados -->
-                 <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
-                     <button class="btn-secondary" onclick="alert('Funcionalidad de Edición en Construcción: Próximamente podrás cambiar Nombre, Celular, Correo.')"><i data-lucide="edit-3" style="width:18px;"></i> Editar mi Información</button>
-                     <button class="btn-secondary" onclick="document.getElementById('historial-modal').style.display='flex'"><i data-lucide="clock" style="width:18px;"></i> Historial de Cuenta</button>
-                 </div>
-
-                 <!-- Modal Simple de Historial -->
-                 <div id="historial-modal" style="display:none; background:rgba(0,0,0,0.8); position:fixed; inset:0; z-index:9999; align-items:center; justify-content:center; padding:1rem; backdrop-filter: blur(5px);">
-                     <div class="qualification-container" style="background:var(--bg-card); max-width:500px; width:100%; border:1px solid var(--primary); margin: 0; position: relative;">
-                         <h3 style="color:white; margin-bottom: 1rem;">Historial FixNet</h3>
-                         <ul style="color: var(--text-muted); line-height: 2.2; margin-bottom: 2rem; list-style: none;">
-                             <li><i data-lucide="check-circle" style="color:var(--primary); width:16px;"></i> Hoy: Creación de Cuenta FixNet.</li>
-                             <li><i data-lucide="clock" style="color:#fbbf24; width:16px;"></i> Pendiente: Solicitud de Instalación/Plan.</li>
-                             <li><i data-lucide="file-text" style="color:var(--text-muted); width:16px;"></i> Sin facturaciones previas.</li>
-                         </ul>
-                         <button class="btn-primary w-100" onclick="document.getElementById('historial-modal').style.display='none'">Cerrar</button>
-                     </div>
-                 </div>
-
-                 <div class="input-row" style="margin-bottom: 3rem; grid-template-columns: 1fr;">
-                     <!-- Promo -->
-                     <div class="testimonial-card" style="background: rgba(176, 0, 255, 0.1); border-color: var(--secondary);">
-                         <h3>🎁 Promoción Activa</h3>
-                         <p style="margin: 1rem 0; color: white;">Por tu nuevo registro, la pre-instalación es <b style="color:var(--primary)">100% GRATIS</b> en tu zona hoy.</p>
-                     </div>
-                 </div>
-
-                 <!-- Gráfica Semanal y Cobertura (FixNet V2 Premium) -->
-                 <div class="input-row" style="margin-bottom: 3rem; align-items: stretch;">
-                     <div class="testimonial-card" style="display:flex; flex-direction:column;">
-                         <h3 style="margin-bottom: 1rem; display:flex; align-items:center; gap:0.5rem;"><i data-lucide="bar-chart-2"></i> Tráfico de Datos (Mes)</h3>
-                         <div style="flex:1; position: relative;">
-                             <canvas id="usageChart" style="min-height: 200px;"></canvas>
-                         </div>
-                     </div>
-                     <div class="testimonial-card" style="display:flex; flex-direction:column;">
-                         <h3 style="margin-bottom: 1rem; display:flex; align-items:center; gap:0.5rem;"><i data-lucide="map-pin"></i> Radar de Cobertura</h3>
-                         <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:1rem;">Haz clic en el mapa para analizar las ondas espectrales en tu zona.</p>
-                         <div id="coverageMap" style="flex:1; min-height: 200px; border-radius:12px; z-index: 1;"></div>
-                         <div id="map-result" style="margin-top:1rem; font-weight:600; color:var(--primary);">Esperando escaneo...</div>
-                     </div>
-                 </div>
-
-                 <div class="section-header">
-                     <h2>Planes <span class="gradient-text">Recomendados para Ti</span></h2>
-                     <p>Hemos calculado estos precios especiales basados en tu Estrato.</p>
-                 </div>
-                 
-                 <div id="dash-plans" class="services-grid">
-                     <!-- Javascript inyectará los planes dinámicos aquí -->
-                 </div>
-             </section>
-        </div>
-
-        <!-- VISTA 5: SUPPORT -->
-        <div id="view-support" class="view">
-            <section class="services-section">
-                <div class="section-header">
-                    <h2>Centro de <span class="gradient-text">Ayuda y Soporte</span></h2>
-                    <p>Resuelve problemas técnicos al instante con nuestro diagnosticador virtual.</p>
+        <!-- VISTA 4: PÚBLICA DE PLANES -->
+        <div id="view-plans" class="view">
+            <div class="dashboard-header" style="justify-content: center; text-align: center; padding-top: 60px;">
+                <div style="max-width: 600px;">
+                    <div class="section-tag" style="margin-bottom: 10px;">Planes Universales</div>
+                    <h2 style="font-size: 40px; margin-bottom: 12px;">Encuentra el internet perfecto</h2>
+                    <p style="font-size: 17px; color: var(--neutral-600);">Estos son nuestros planes base de Fibra Óptica. Ingresa a tu panel para ver tarifas ajustadas según tu perfil estrato-socioeconómico.</p>
                 </div>
-
-                <div class="qualification-container" style="max-width: 800px;">
-                    <button id="btn-show-support" class="btn-primary w-100" style="margin-bottom: 2rem;" onclick="document.getElementById('support-form-wrapper').style.display='block'; this.style.display='none';">
-                        <i data-lucide="alert-triangle"></i> ¿Tienes problemas con tu internet?
-                    </button>
-
-                    <div id="support-form-wrapper" style="display: none;">
-                        <form id="support-form" class="qualify-form">
-                            <div class="input-group">
-                                <label>¿Qué tipo de problema presentas?</label>
-                                <select id="sup-issue" required class="custom-select w-100">
-                                    <option value="" disabled selected>Selecciona tu problema...</option>
-                                    <option value="noconn">Sin conexión a internet (Foco rojo)</option>
-                                    <option value="slow">Internet lento</option>
-                                    <option value="intermit">Intermitencia (Se acorta o desconecta a ratos)</option>
-                                    <option value="router">Problemas con el Router / Wi-Fi (No llega señal)</option>
-                                </select>
-                            </div>
-                            <div class="input-group">
-                                <label>Descripción breve de la falla (Opcional)</label>
-                                <input type="text" id="sup-desc" placeholder="Detalla tu problema...">
-                            </div>
-                            <button type="submit" class="btn-primary w-100 mt-2">Diagnosticar Automáticamente</button>
-                        </form>
+            </div>
+            <section style="padding-top: 40px;">
+                <div class="plans-grid">
+                    <!-- Basic Plan -->
+                    <div class="plan-card">
+                        <div class="plan-top">
+                            <h3 class="plan-name-txt">Básico Residencial</h3>
+                            <div style="font-size: 11px; font-weight: 500; color: var(--brand); background: var(--brand-lt); padding: 3px 10px; border-radius: 20px;">Fibra</div>
+                        </div>
+                        <div class="plan-speed">
+                            <div class="plan-speed-val">50</div>
+                            <div class="plan-speed-unit">Mbps</div>
+                        </div>
+                        <p class="plan-desc">Navega, trabaja y haz videollamadas sin interrupciones. Ideal redes sociales.</p>
+                        <div class="plan-price-row">
+                            <div class="plan-price">$55.000</div>
+                            <div class="plan-period">/ mes aprox.</div>
+                        </div>
+                        <ul class="plan-features">
+                            <li><div class="feat-check"><i data-lucide="check" width="12"></i></div>Internet fibra óptica</li>
+                            <li><div class="feat-check"><i data-lucide="check" width="12"></i></div>Sin límite de datos</li>
+                            <li><div class="feat-check"><i data-lucide="check" width="12"></i></div>Router Inalámbrico</li>
+                        </ul>
+                        <button class="btn btn-outline btn-lg w-100" onclick="router.navigate('auth')">Contratar en el Panel</button>
                     </div>
 
-                    <div id="support-response" style="margin-top: 2rem; display: none; padding: 2rem; background: rgba(0,242,255,0.05); border: 1px solid var(--primary); border-radius: 15px;">
-                        <h3 style="color: var(--primary); display:flex; gap:0.5rem; align-items:center;"><i data-lucide="cpu"></i> I.A de Diagnóstico Automático</h3>
-                        <p id="sup-text" style="margin-top: 1rem; color: white;"></p>
+                    <!-- Standard Featured -->
+                    <div class="plan-card featured">
+                        <div class="plan-badge">El Más Popular</div>
+                        <div class="plan-top">
+                            <h3 class="plan-name-txt">Estándar Urbano</h3>
+                            <div style="font-size: 11px; font-weight: 500; color: var(--brand); background: var(--brand-lt); padding: 3px 10px; border-radius: 20px;">Fibra</div>
+                        </div>
+                        <div class="plan-speed">
+                            <div class="plan-speed-val">100</div>
+                            <div class="plan-speed-unit">Mbps</div>
+                        </div>
+                        <p class="plan-desc">Perfecto para familias. Streaming 4K, gaming y trabajo desde casa simultáneo.</p>
+                        <div class="plan-price-row">
+                            <div class="plan-price">$75.000</div>
+                            <div class="plan-period">/ mes aprox.</div>
+                        </div>
+                        <ul class="plan-features">
+                            <li><div class="feat-check"><i data-lucide="check" width="12"></i></div>Fibra óptica simétrica</li>
+                            <li><div class="feat-check"><i data-lucide="check" width="12"></i></div>Soporte prioritario 24/7</li>
+                            <li><div class="feat-check"><i data-lucide="check" width="12"></i></div>IP Pública Aleatoria</li>
+                            <li><div class="feat-check"><i data-lucide="check" width="12"></i></div>Instalación exprés</li>
+                        </ul>
+                        <button class="btn btn-primary btn-lg w-100" onclick="router.navigate('auth')">Contratar en el Panel</button>
+                    </div>
+
+                    <!-- Pro -->
+                    <div class="plan-card">
+                        <div class="plan-top">
+                            <h3 class="plan-name-txt">Premium / Gamer</h3>
+                            <div style="font-size: 11px; font-weight: 500; color: var(--brand); background: var(--brand-lt); padding: 3px 10px; border-radius: 20px;">Fibra X</div>
+                        </div>
+                        <div class="plan-speed">
+                            <div class="plan-speed-val">300</div>
+                            <div class="plan-speed-unit">Mbps</div>
+                        </div>
+                        <p class="plan-desc">Para hogares con alta exigencia o YouTubers. Ping mínimo garantizado.</p>
+                        <div class="plan-price-row">
+                            <div class="plan-price">$110.000</div>
+                            <div class="plan-period">/ mes aprox.</div>
+                        </div>
+                        <ul class="plan-features">
+                            <li><div class="feat-check"><i data-lucide="check" width="12"></i></div>Fibra directa UTP6</li>
+                            <li><div class="feat-check"><i data-lucide="check" width="12"></i></div>Ping ultrabajo (&lt;5ms)</li>
+                            <li><div class="feat-check"><i data-lucide="check" width="12"></i></div>Soporte VIP Gamer</li>
+                        </ul>
+                        <button class="btn btn-outline btn-lg w-100" onclick="router.navigate('auth')">Contratar en el Panel</button>
                     </div>
                 </div>
             </section>
         </div>
-    </div>
 
-    <!-- VISTA 6: ADMIN OCULTO -->
-    <div id="view-admin" class="view" style="padding-top:120px; padding-bottom:5rem;">
-        <section class="qualification-container" style="max-width:900px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2rem;">
-                <h2 style="color:var(--primary);"><i data-lucide="database"></i> FixNet Central DB</h2>
-                <button class="btn-secondary" onclick="router.navigate('dashboard')">Regresar</button>
-            </div>
-            <div id="admin-table-container" style="overflow-x:auto;"></div>
-        </section>
-    </div>
-
-    <!-- CHECKOUT MODAL SUPERIOR -->
-    <div id="checkout-modal" style="display:none; background:rgba(6,9,19,0.95); position:fixed; inset:0; z-index:99999; align-items:center; justify-content:center; padding:1rem; backdrop-filter: blur(10px);">
-        <div class="qualification-container" style="background:var(--bg-card); max-width:600px; width:100%; border:1px solid var(--primary); margin: 0; padding:3rem;">
-            <h2 style="margin-bottom: 0.5rem;">Contratar <span id="chk-plan-name" class="gradient-text">Plan</span></h2>
-            <p style="color:var(--text-muted); margin-bottom:2rem;">Solo falta un paso para activar el futuro digital en tu hogar.</p>
-            
-            <form id="checkout-form" class="qualify-form">
-                <div class="input-group">
-                    <label>Hardware y Equipo (Router)</label>
-                    <select id="chk-router" class="custom-select w-100" onchange="dashboard.updateCheckoutSum()">
-                        <option value="0">Router Básico Integrado ($0)</option>
-                        <option value="5000">Financiar Router Avanzado 5G (+$5.000/mes)</option>
-                    </select>
+        <!-- VISTA 5: SUPPORT PÚBLICO / DIAGNÓSTICO -->
+        <div id="view-support" class="view">
+            <div class="dashboard-header" style="justify-content: center; text-align: center; padding-top: 60px;">
+                <div style="max-width: 600px;">
+                    <div class="section-tag" style="margin-bottom: 10px;">Diagnóstico de Inteligencia Artificial</div>
+                    <h2 style="font-size: 40px; margin-bottom: 12px;">Soluciona caídas de forma automática</h2>
+                    <p style="font-size: 17px; color: var(--neutral-600);">Nuestro sistema analiza el pulso de red óptico hasta tu casa y envía comandos de estabilización automáticamente.</p>
                 </div>
-                <div class="input-row">
-                    <div class="input-group">
-                        <label>Fecha de Instalación Deseada</label>
-                        <input type="date" id="chk-date" required>
+            </div>
+
+            <section style="padding-top: 40px; max-width: 800px; margin: 0 auto;">
+                <div class="auth-card" style="max-width: 100%; padding: 40px;">
+                    <h3 style="font-size: 22px; font-weight: 600; margin-bottom: 8px;">¿Qué sucede con tu conexión?</h3>
+                    <p style="font-size: 14px; color: var(--neutral-600); margin-bottom: 24px;">Selecciona el problema y nuestro diagnostico emitirá una solución en tiempo real.</p>
+                    
+                    <form id="support-form">
+                        <div class="form-group">
+                            <label>Síntoma principal detectado</label>
+                            <select id="sup-issue" class="form-control" required style="cursor: pointer;">
+                                <option value="" disabled selected>Elige una opción...</option>
+                                <option value="noconn">Luces del Router rojas / Sin acceso a internet total</option>
+                                <option value="slow">Internet demasiado lento o videos que se pausan</option>
+                                <option value="intermit">Microcortes: El wifi se desconecta a ratos</option>
+                                <option value="router">El wifi no llega a mi habitación u otras piezas</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg w-100" style="margin-top: 16px;">Iniciar Diagnóstico Remoto IA</button>
+                    </form>
+
+                    <!-- Resultado de la IA -->
+                    <div id="support-response" style="display: none; margin-top: 32px; padding: 24px; background: var(--brand-lt); border: 1px solid var(--brand); border-radius: var(--radius-md);">
+                        <div style="display: flex; align-items: center; gap: 8px; color: var(--brand); font-weight: 600; margin-bottom: 12px;">
+                            <i data-lucide="cpu"></i> Resolución del sistema Fixy AI
+                        </div>
+                        <p id="sup-text" style="color: var(--neutral-900); font-size: 15px; line-height: 1.6;"></p>
                     </div>
                 </div>
-                <div style="background:rgba(255,255,255,0.05); padding:1.5rem; border-radius:12px; margin: 1.5rem 0;">
-                    <p style="display:flex; justify-content:space-between; margin-bottom:0.5rem;"><span>Plan Mensual:</span> <span id="chk-base-price">$0</span></p>
-                    <p style="display:flex; justify-content:space-between; margin-bottom:0.5rem;"><span>Equipo:</span> <span id="chk-router-price">$0</span></p>
-                    <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:1rem 0;">
-                    <h3 style="display:flex; justify-content:space-between; color:var(--primary);"><span>Total Factura:</span> <span id="chk-total-price">$0</span></h3>
+            </section>
+        </div>
+
+        <!-- VISTA 6: DASHBOARD PRIVADO (USUARIOS LOGUEADOS) -->
+        <div id="view-dashboard" class="view" style="background: var(--neutral-50);">
+            <div class="dashboard-header">
+                <div class="dash-user-info">
+                    <h2 style="display: flex; align-items: center; gap: 12px;">
+                        Hola, <span id="dash-name" style="color: var(--brand);">Usuario</span> 
+                        <span style="font-size: 20px;">👋</span>
+                    </h2>
+                    <div class="dash-location" id="dash-location">
+                        <i data-lucide="map-pin" width="16" style="vertical-align: middle;"></i> Ubicación: Cargando...
+                    </div>
                 </div>
-                <div style="display:flex; gap:1rem;">
-                    <button type="button" class="btn-secondary w-100" onclick="document.getElementById('checkout-modal').style.display='none'">Cancelar</button>
-                    <button type="submit" class="btn-primary w-100">Confirmar e Instalar</button>
+                <div class="status-badge status-ok" id="dash-status">
+                    <i data-lucide="check-circle-2" width="18"></i> Línea Activa y Estable
+                </div>
+            </div>
+
+            <div class="dashboard-widgets">
+                <!-- Gráfica de Uso -->
+                <div class="widget-card">
+                    <h3><i data-lucide="bar-chart-2"></i> Tráfico de Datos de Fibra</h3>
+                    <p style="font-size: 13px; color: var(--neutral-400); margin-bottom: 24px;">Análisis de tu consumo mensual</p>
+                    <div style="height: 250px; position: relative;">
+                        <canvas id="usageChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Mapa de Factibilidad FixNet -->
+                <div class="widget-card">
+                    <h3><i data-lucide="map"></i> Radar de Espectro Óptico</h3>
+                    <p style="font-size: 13px; color: var(--neutral-400); margin-bottom: 16px;">Haz clic en el mapa para validar terminales de fibra en tu cuadra.</p>
+                    <div id="coverageMap" style="height: 200px; border-radius: var(--radius-sm); border: 1px solid var(--neutral-200); z-index: 1;"></div>
+                    <div id="map-result" style="margin-top: 16px; font-weight: 600; color: var(--brand); font-size: 14px;">📡 Sistema a la espera del análisis...</div>
+                </div>
+            </div>
+
+            <!-- Planes recomendados -->
+            <section style="background: #fff; border-top: 1px solid var(--neutral-200);">
+                <div class="section-header">
+                    <h2>Planes especiales para tu perfil</h2>
+                    <p class="section-sub">Hemos ajustado los precios solidarios con algoritmos basados en tu tipo de zona y estrato socioeconómico indicado.</p>
+                </div>
+                
+                <div id="dash-plans" class="plans-grid">
+                    <!-- Javascript inserta las tarjetas combinadas ConectaYa/FixNet aquí -->
+                </div>
+            </section>
+            
+            <section style="padding-top: 0; padding-bottom: 60px; background: #fff;">
+               <div style="text-align: center; border-top: 1px solid var(--neutral-200); padding-top: 32px;">
+                   <button class="btn btn-outline" onclick="dashboard.showHistory()"><i data-lucide="clock"></i> Ver Historial de Cuenta y Facturas</button>
+               </div>
+            </section>
+        </div>
+
+    </div>
+
+    <!-- MAIN CHECKOUT MODAL -->
+    <div id="checkout-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 style="font-size: 24px; margin-bottom: 8px;">Contratar Plan</h2>
+            <p style="color: var(--brand); font-weight: 600; font-size: 18px; margin-bottom: 24px;" id="chk-plan-name">Nombre del Plan</p>
+
+            <form id="checkout-form">
+                <div class="form-group">
+                    <label>Elección de Equipo Terminal (ONT / Router Wi-Fi)</label>
+                    <select id="chk-router" class="form-control" onchange="dashboard.updateCheckoutSum()">
+                        <option value="0">Router Básico Integrado ($0)</option>
+                        <option value="5000">Financiar Router Avanzado 5G Doble Banda (+$5.000/mes)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Fecha de Instalación Deseada</label>
+                    <input type="date" id="chk-date" class="form-control" required>
+                </div>
+                
+                <div style="background: var(--neutral-50); padding: 20px; border-radius: var(--radius-md); margin: 24px 0; border: 1px dashed var(--neutral-300);">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; color: var(--neutral-600);">
+                        <span>Suscripción Mensual:</span> <span id="chk-base-price">$0</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; color: var(--neutral-600);">
+                        <span>Arrendamiento Equipo:</span> <span id="chk-router-price">$0</span>
+                    </div>
+                    <div style="border-top: 1px solid var(--neutral-200); margin: 16px 0;"></div>
+                    <div style="display: flex; justify-content: space-between; font-size: 18px; font-weight: 600; color: var(--neutral-900);">
+                        <span>Total a Facturar:</span> <span id="chk-total-price">$0</span>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 12px;">
+                    <button type="button" class="btn btn-outline btn-lg w-100" onclick="document.getElementById('checkout-modal').classList.remove('active')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary btn-lg w-100">Agendar Instalación</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- CHATBOT FLOTANTE FIXY -->
-    <div id="chatbot-orb" style="position:fixed; bottom:30px; right:30px; width:60px; height:60px; background:var(--primary); border-radius:50%; box-shadow:0 0 20px rgba(0,242,255,0.5); cursor:pointer; display:flex; justify-content:center; align-items:center; z-index:9000; transition:transform 0.3s;" onclick="chatbot.toggle()">
-        <i data-lucide="message-circle" style="color:black; width:30px; height:30px;"></i>
+    <!-- HISTORY MODAL -->
+    <div id="history-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 600px;">
+            <h2 style="font-size: 24px; margin-bottom: 16px;">Historial y Auditoría</h2>
+            <ul id="history-list" style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 12px; max-height: 300px; overflow-y: auto;">
+                <!-- Generated lines via JS -->
+            </ul>
+            <div style="margin-top: 24px; text-align: right;">
+                <button class="btn btn-primary" onclick="document.getElementById('history-modal').classList.remove('active')">Cerrar Ventana</button>
+            </div>
+        </div>
     </div>
-    <div id="chatbot-window" style="display:none; position:fixed; bottom:100px; right:30px; width:350px; background:var(--bg-card); border:1px solid var(--primary); border-radius:20px; box-shadow:0 20px 40px rgba(0,0,0,0.5); z-index:9000; flex-direction:column; overflow:hidden;">
-        <div style="background:var(--primary); padding:1rem; color:black; font-weight:bold; display:flex; justify-content:space-between;">
-            <span style="display:flex; align-items:center; gap:0.5rem;"><i data-lucide="bot"></i> Fixy - Asistente IA</span>
-            <i data-lucide="x" style="cursor:pointer;" onclick="chatbot.toggle()"></i>
+
+    <!-- FLOATING CHATBOT WIDGET -->
+    <button class="chatbot-trigger" onclick="chatbot.toggle()">
+        <i data-lucide="message-square" width="28"></i>
+    </button>
+    <div id="chatbot-window" class="chatbot-window">
+        <div class="chat-header">
+            <div class="chat-header-info">
+                <div class="chat-avatar"><i data-lucide="bot" width="20"></i></div>
+                <div>
+                    <strong>IA Asistente Fixy</strong>
+                    <span>En línea · ConectaYa</span>
+                </div>
+            </div>
+            <button class="chat-close" onclick="chatbot.toggle()"><i data-lucide="x"></i></button>
         </div>
-        <div id="chatbot-messages" style="height:300px; padding:1rem; overflow-y:auto; display:flex; flex-direction:column; gap:1rem;">
-            <!-- Message thread -->
+        <div class="chat-messages" id="chatbot-messages">
+            <!-- Messages pushed here -->
         </div>
-        <div style="padding:1rem; border-top:1px solid rgba(255,255,255,0.1); display:flex; gap:0.5rem;">
-            <input type="text" id="chatbot-input" placeholder="Pregunta algo..." style="flex:1; background:rgba(255,255,255,0.05); border:none; border-radius:50px; padding:0.8rem; color:white; outline:none;" onkeypress="if(event.key === 'Enter') chatbot.send()">
-            <button class="btn-primary" style="padding:0.8rem; border-radius:50%;" onclick="chatbot.send()"><i data-lucide="send"></i></button>
+        <div class="chat-input-area">
+            <input type="text" class="chat-input" id="chatbot-input" placeholder="Pregunta algo..." onkeypress="if(event.key === 'Enter') chatbot.send()">
+            <button class="chat-send" onclick="chatbot.send()"><i data-lucide="send" width="18"></i></button>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="script.js"></script>
-    <!-- Desactivando astra temporalmente para evitar que bloquee Fixy JS -->
 </body>
 </html>
