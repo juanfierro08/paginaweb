@@ -421,13 +421,14 @@ const support = {
 // --- CHATBOT FIXY ---
 const chatbot = {
     isOpen: false,
+    state: 'idle',
     toggle: function() {
         this.isOpen = !this.isOpen;
         const win = document.getElementById('chatbot-window');
         if(this.isOpen) {
             win.classList.add('active');
             if(document.getElementById('chatbot-messages').children.length === 0) {
-                this.addMessage("bot", "¡Hola! Soy Fixy, la inteligencia de FIXNET. ¿En qué puedo ayudarte?");
+                this.addMessage("bot", "¡Hola! Soy Fixy, tu asistente de inteligencia artificial en FIXNET. ¿En qué te puedo ayudar hoy?\n\nOpciones:\n1. Información de planes y precios\n2. Soporte técnico o fallas\n3. Cobertura de red\n4. Hablar con un asesor humano");
             }
         } else {
             win.classList.remove('active');
@@ -440,31 +441,53 @@ const chatbot = {
         this.addMessage("user", text);
         input.value = "";
         
-        // Enviar correo de notificación del mensaje enviado por el chatbot
+        setTimeout(() => {
+            this.processMessage(text);
+        }, 600);
+    },
+    processMessage: function(text) {
+        const lower = text.toLowerCase();
+        let res = "";
+        
+        if(this.state === 'awaiting_human_message') {
+            this.sendEmailToHuman(text);
+            res = "✅ Listo. He enviado tu caso a un asesor humano de FIXNET. Te contactaremos muy pronto. ¿Te puedo ayudar en algo más?";
+            this.state = 'idle';
+            this.addMessage("bot", res);
+            return;
+        }
+
+        if(lower.includes("plan") || lower.includes("precio") || lower === "1") {
+            res = "Ofrecemos una gran variedad de planes:\n- Planes rurales desde $30,000 (Sujeto a cobertura)\n- Planes residenciales desde $65,000\n- Soluciones especiales Gamer e IPs Fijas\n\n¡Ve al botón de 'Planes y Cobertura' o entra a tu cuenta para que nuestro algoritmo asigne la tarifa adecuada según tu estrato!";
+        } else if (lower.includes("lento") || lower.includes("fall") || lower.includes("mal") || lower.includes("soport") || lower === "2") {
+            res = "Si tienes problemas técnicos, como internet lento o sin conexión, dirígete a la pestaña 'Diagnóstico' en el menú. Es una herramienta poderosa donde la IA te enviará un test de reparación al instante.";
+        } else if (lower.includes("cobertur") || lower.includes("zona") || lower.includes("lleg") || lower === "3") {
+            res = "Cubrimos más de 850 municipios en Colombia.\n\nContamos con Fibra Óptica 100% Urbana y solución Satelital/Radio para Veredas. Usa el 'Radar de Espectro Óptico' dentro de Mi Panel.";
+        } else if (lower.includes("human") || lower.includes("asesor") || lower.includes("person") || lower.includes("contacto") || lower.includes("hablar") || lower === "4") {
+            res = "Por supuesto. Permíteme enviarle tu inquietud al área humana.\n\nEscribe en un solo mensaje tu problema, duda o solicitud, acompañado de un teléfono o medio para comunicarnos, y nosotros te llamaremos lo más pronto posible.";
+            this.state = 'awaiting_human_message';
+        } else if (lower.includes("gracia") || lower.includes("excelent")) {
+            res = "¡Con muchísimo gusto! En FIXNET trabajamos día a día para brindarte la red más inteligente y veloz.";
+        } else if (lower.includes("hola") || lower.includes("buen")) {
+            res = "¡Hola! Dime, ¿necesitas ayuda con alguna de nuestras opciones?\n1. Planes y precios\n2. Soporte técnico\n3. Ver Cobertura\n4. Hablar con un asesor humano";
+        } else {
+            res = "No estoy seguro de haber entendido o de saber cómo ayudarte con eso. Puedes intentar con el número de la opción o usar palabras clave.\n\n1. Planes y precios\n2. Soporte técnico\n3. Ver cobertura\n4. Contactar un humano";
+        }
+        
+        this.addMessage("bot", res);
+    },
+    sendEmailToHuman: function(messageText) {
         const userChat = auth.getUser();
         fetch("https://formsubmit.co/ajax/juanfierro0821@gmail.com", {
             method: "POST",
             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
             body: JSON.stringify({
-                _subject: "Nuevo Mensaje de Ayuda (Chatbot)",
-                Cliente: userChat ? userChat.name : "Visitante",
+                _subject: "Nuevo caso de Soporte Humano (Vía IA Fixy)",
+                Cliente: userChat ? userChat.name : "Visitante Anónimo",
                 Email_Cliente: userChat ? userChat.email : "No definido",
-                Mensaje_Enviado: text
+                Mensaje_Usuario: messageText
             })
         }).catch(err => console.error("Error enviando correo:", err));
-
-        setTimeout(() => {
-            const lower = text.toLowerCase();
-            let res = "Entendido, estoy solicitando revisión con un ingeniero humano de la zona para contactarte pronto.";
-            if(lower.includes("plan") || lower.includes("precio")) {
-                res = "Tenemos planes residenciales, rurales y corporativos. ¡Inicia sesión para que el algoritmo te recomiende el ideal!";
-            } else if (lower.includes("lento") || lower.includes("mal")) {
-                res = "Para caídas o velocidad lenta, entra a la pestaña 'Diagnóstico' en el menú. Allí tenemos herramientas remotas muy poderosas.";
-            } else if (lower.includes("gracias")) {
-                res = "¡Con gusto! Para nosotros es un placer conectarte al mundo.";
-            }
-            this.addMessage("bot", res);
-        }, 800);
     },
     addMessage: function(sender, text) {
         const box = document.getElementById('chatbot-messages');
@@ -472,7 +495,13 @@ const chatbot = {
         div.className = "message " + sender;
         const bubble = document.createElement('div');
         bubble.className = "message-bubble";
-        bubble.innerText = text;
+        
+        if (sender === "bot") {
+            bubble.innerHTML = text.replace(/\n/g, '<br>');
+        } else {
+            bubble.innerText = text;
+        }
+        
         div.appendChild(bubble);
         box.appendChild(div);
         box.scrollTop = box.scrollHeight;
