@@ -1,4 +1,4 @@
-// FixNet + ConectaYa Unified SPA Logic
+// FixNet + FIXNET Unified SPA Logic
 
 // --- NAVIGATION & MOBILE MENU ---
 const nav = {
@@ -55,8 +55,8 @@ const router = {
 
 // --- AUTHENTICATION & USER DB ---
 const auth = {
-    isLoggedIn: () => localStorage.getItem('conectaya_user') !== null,
-    getUser: () => JSON.parse(localStorage.getItem('conectaya_user')),
+    isLoggedIn: () => localStorage.getItem('FIXNET_user') !== null,
+    getUser: () => JSON.parse(localStorage.getItem('FIXNET_user')),
     
     toggleMode: function() {
         const loginForm = document.getElementById('login-form');
@@ -68,7 +68,7 @@ const auth = {
             loginForm.style.display = 'block';
             regForm.style.display = 'none';
             title.innerHTML = 'Inicia Sesión';
-            subtitle.innerText = 'Accede a tu portal FixNet / ConectaYa';
+            subtitle.innerText = 'Accede a tu portal FIXNET';
         } else {
             loginForm.style.display = 'none';
             regForm.style.display = 'block';
@@ -81,11 +81,11 @@ const auth = {
         e.preventDefault();
         const em = document.getElementById('login-email').value;
         const pass = document.getElementById('login-password').value;
-        const users = JSON.parse(localStorage.getItem('conectaya_db') || '[]');
+        const users = JSON.parse(localStorage.getItem('FIXNET_db') || '[]');
         
         const user = users.find(u => u.email === em && u.password === pass);
         if(user) {
-            localStorage.setItem('conectaya_user', JSON.stringify(user));
+            localStorage.setItem('FIXNET_user', JSON.stringify(user));
             if(!user.onboarded) router.navigate('onboarding');
             else router.navigate('dashboard');
         } else {
@@ -99,7 +99,7 @@ const auth = {
         const em = document.getElementById('reg-email').value;
         const pass = document.getElementById('reg-password').value;
         
-        const users = JSON.parse(localStorage.getItem('conectaya_db') || '[]');
+        const users = JSON.parse(localStorage.getItem('FIXNET_db') || '[]');
         if(users.find(u => u.email === em)) {
             alert("El correo ya está registrado.");
             return;
@@ -107,8 +107,8 @@ const auth = {
         
         const newUser = { name, email: em, password: pass, onboarded: false };
         users.push(newUser);
-        localStorage.setItem('conectaya_db', JSON.stringify(users));
-        localStorage.setItem('conectaya_user', JSON.stringify(newUser));
+        localStorage.setItem('FIXNET_db', JSON.stringify(users));
+        localStorage.setItem('FIXNET_user', JSON.stringify(newUser));
         
         router.navigate('onboarding');
     },
@@ -127,18 +127,18 @@ const auth = {
         currentUser.estrato = estrato;
         currentUser.onboarded = true;
         
-        const users = JSON.parse(localStorage.getItem('conectaya_db'));
+        const users = JSON.parse(localStorage.getItem('FIXNET_db'));
         const index = users.findIndex(u => u.email === currentUser.email);
         users[index] = currentUser;
         
-        localStorage.setItem('conectaya_db', JSON.stringify(users));
-        localStorage.setItem('conectaya_user', JSON.stringify(currentUser));
+        localStorage.setItem('FIXNET_db', JSON.stringify(users));
+        localStorage.setItem('FIXNET_user', JSON.stringify(currentUser));
         
         router.navigate('dashboard');
     },
     
     logout: function() {
-        localStorage.removeItem('conectaya_user');
+        localStorage.removeItem('FIXNET_user');
         router.navigate('landing');
     }
 };
@@ -208,7 +208,7 @@ const visuals = {
             currentMarker = L.marker(e.latlng).addTo(map);
             
             const res = document.getElementById('map-result');
-            res.innerHTML = '<span style="color:var(--neutral-400)">Consultando base de terminales ConectaYa...</span>';
+            res.innerHTML = '<span style="color:var(--neutral-400)">Consultando base de terminales FIXNET...</span>';
             setTimeout(() => {
                 if(user.zona === 'rural') {
                     res.innerHTML = '<i data-lucide="satellite" width="16"></i> Señal Microondas Satelital detectada en las coordenadas.';
@@ -331,20 +331,37 @@ const dashboard = {
         e.preventDefault();
         const date = document.getElementById('chk-date').value;
         const total = document.getElementById('chk-total-price').innerText;
+        const user = auth.getUser();
         
         alert(`¡Contrato generado con éxito!\nPlan: ${this.currentCheckoutPlan.name}\nInstalación: ${date}\nTarifa Final: ${total}`);
         document.getElementById('checkout-modal').classList.remove('active');
+
+        // Enviar correo de notificación de compra
+        fetch("https://formsubmit.co/ajax/juanfierro0821@gmail.com", {
+            method: "POST",
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                _subject: "¡Nuevo Plan Contratado - FIXNET!",
+                Cliente: user ? user.name : "Desconocido",
+                Email_Cliente: user ? user.email : "Desconocido",
+                Plan: this.currentCheckoutPlan.name,
+                Fecha_Instalacion: date,
+                Total: total
+            })
+        }).catch(err => console.error("Error enviando correo:", err));
         
         // Registrar en historial local
-        const user = auth.getUser();
-        let history = JSON.parse(localStorage.getItem('conectaya_history_' + user.email) || '[]');
+        let history = JSON.parse(localStorage.getItem('FIXNET_history_' + (user ? user.email : 'guest')) || '[]');
         history.push(`✅ Contrato para ${this.currentCheckoutPlan.name} aceptado. Fecha estimada: ${date}. Total: ${total}.`);
-        localStorage.setItem('conectaya_history_' + user.email, JSON.stringify(history));
+        if(user) localStorage.setItem('FIXNET_history_' + user.email, JSON.stringify(history));
     },
 
     showHistory: function() {
         const user = auth.getUser();
-        const history = JSON.parse(localStorage.getItem('conectaya_history_' + user.email) || '[]');
+        const history = JSON.parse(localStorage.getItem('FIXNET_history_' + user.email) || '[]');
         const list = document.getElementById('history-list');
         
         list.innerHTML = '';
@@ -373,6 +390,19 @@ const support = {
                 resBox.style.display = 'block';
                 resText.innerHTML = "<em>Ejecutando algoritmo de testeo sobre la red óptica...</em>";
                 
+                // Enviar correo de notificación de diagnóstico
+                const userDiag = auth.getUser();
+                fetch("https://formsubmit.co/ajax/juanfierro0821@gmail.com", {
+                    method: "POST",
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({
+                        _subject: "Solicitud de Soporte / Diagnóstico de Red",
+                        Cliente: userDiag ? userDiag.name : "Visitante",
+                        Email_Cliente: userDiag ? userDiag.email : "No definido",
+                        Sintoma_Detectado: issue
+                    })
+                }).catch(err => console.error("Error enviando correo:", err));
+
                 setTimeout(() => {
                     let ans = "";
                     switch(issue) {
@@ -397,7 +427,7 @@ const chatbot = {
         if(this.isOpen) {
             win.classList.add('active');
             if(document.getElementById('chatbot-messages').children.length === 0) {
-                this.addMessage("bot", "¡Hola! Soy Fixy, la inteligencia de ConectaYa. ¿En qué puedo ayudarte?");
+                this.addMessage("bot", "¡Hola! Soy Fixy, la inteligencia de FIXNET. ¿En qué puedo ayudarte?");
             }
         } else {
             win.classList.remove('active');
@@ -410,6 +440,19 @@ const chatbot = {
         this.addMessage("user", text);
         input.value = "";
         
+        // Enviar correo de notificación del mensaje enviado por el chatbot
+        const userChat = auth.getUser();
+        fetch("https://formsubmit.co/ajax/juanfierro0821@gmail.com", {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({
+                _subject: "Nuevo Mensaje de Ayuda (Chatbot)",
+                Cliente: userChat ? userChat.name : "Visitante",
+                Email_Cliente: userChat ? userChat.email : "No definido",
+                Mensaje_Enviado: text
+            })
+        }).catch(err => console.error("Error enviando correo:", err));
+
         setTimeout(() => {
             const lower = text.toLowerCase();
             let res = "Entendido, estoy solicitando revisión con un ingeniero humano de la zona para contactarte pronto.";
@@ -456,3 +499,4 @@ window.onload = () => {
         router.navigate('landing');
     }
 };
+
